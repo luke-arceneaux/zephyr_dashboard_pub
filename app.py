@@ -38,6 +38,20 @@ def make_clickable(label, url):
         return ""
     return f"[{label}]({url})"
 
+
+def generate_presigned_url(s3_uri):
+    if pd.isna(s3_uri) or not s3_uri:
+        return None
+
+    bucket, key = parse_s3_uri(s3_uri)
+
+    s3 = boto3.client("s3")
+    return s3.generate_presigned_url(
+        ClientMethod="get_object",
+        Params={"Bucket": bucket, "Key": key},
+        ExpiresIn=PRESIGNED_EXPIRY
+    )
+
 @st.cache_data
 def add_presigned_links(df):
     df = df.copy()
@@ -55,20 +69,6 @@ def add_presigned_links(df):
     )
 
     return df
-
-
-def generate_presigned_url(s3_uri):
-    if pd.isna(s3_uri) or not s3_uri:
-        return None
-
-    bucket, key = parse_s3_uri(s3_uri)
-
-    s3 = boto3.client("s3")
-    return s3.generate_presigned_url(
-        ClientMethod="get_object",
-        Params={"Bucket": bucket, "Key": key},
-        ExpiresIn=PRESIGNED_EXPIRY
-    )
 
 
 def add_date_and_start_time(df):
@@ -135,7 +135,7 @@ if selected_subject == "All Subjects":
 else:
     subject_df = df[df["Subject_ID"] == selected_subject].sort_values("Date")
 
-# subject_df = add_presigned_links(subject_df)
+subject_df = add_presigned_links(subject_df)
 
 
 # -----------------------------
