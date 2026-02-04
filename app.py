@@ -78,21 +78,30 @@ def generate_presigned_url(s3_uri):
         return None
 
 
+# @st.cache_data
+# def add_presigned_links(df):
+#     df = df.copy()
+
+#     df["PDF Report"] = df["PDF Report"].apply(
+#         lambda x: make_clickable("PDF", generate_presigned_url(x))
+#     )
+
+#     df["Interactive Report"] = df["Interactive Report"].apply(
+#         lambda x: make_clickable("HTML", generate_presigned_url(x))
+#     )
+
+#     df["SpO2 Snapshot"] = df["SpO2 Snapshot"].apply(
+#         lambda x: make_clickable("View", generate_presigned_url(x))
+#     )
+
+#     return df
 @st.cache_data
 def add_presigned_links(df):
     df = df.copy()
 
-    df["PDF Report"] = df["PDF Report"].apply(
-        lambda x: make_clickable("PDF", generate_presigned_url(x))
-    )
-
-    df["Interactive Report"] = df["Interactive Report"].apply(
-        lambda x: make_clickable("HTML", generate_presigned_url(x))
-    )
-
-    df["SpO2 Snapshot"] = df["SpO2 Snapshot"].apply(
-        lambda x: make_clickable("View", generate_presigned_url(x))
-    )
+    df["PDF Report"] = df["PDF Report"].apply(generate_presigned_url)
+    df["Interactive Report"] = df["Interactive Report"].apply(generate_presigned_url)
+    df["SpO2 Snapshot"] = df["SpO2 Snapshot"].apply(generate_presigned_url)
 
     return df
 
@@ -222,33 +231,33 @@ st.subheader("Nights of Sleep")
 #     on_select="rerun",
 #     key="sleep_table"
 # )
-st.dataframe(
-    subject_df[DISPLAY_COLUMNS],
-    use_container_width=True,
-    column_config={
-        "PDF_Report": st.column_config.MarkdownColumn("PDF Report"),
-        "Interactive_Report": st.column_config.MarkdownColumn("Interactive Report"),
-        "SpO2_Snapshot": st.column_config.MarkdownColumn("SpO₂ Plot")
-    }
-)
 # st.dataframe(
 #     subject_df[DISPLAY_COLUMNS],
 #     use_container_width=True,
 #     column_config={
-#         "PDF Report": st.column_config.LinkColumn(
-#             "PDF Report", 
-#             display_text="PDF"
-#         ),
-#         "Interactive Report": st.column_config.LinkColumn(
-#             "Interactive Report", 
-#             display_text="HTML"
-#         ),
-#         "SpO2 Snapshot": st.column_config.LinkColumn(
-#             "SpO2 Snapshot", 
-#             display_text="View"
-#         )
+#         "PDF_Report": st.column_config.MarkdownColumn("PDF Report"),
+#         "Interactive_Report": st.column_config.MarkdownColumn("Interactive Report"),
+#         "SpO2_Snapshot": st.column_config.MarkdownColumn("SpO₂ Plot")
 #     }
 # )
+st.dataframe(
+    subject_df[DISPLAY_COLUMNS],
+    use_container_width=True,
+    column_config={
+        "PDF Report": st.column_config.LinkColumn(
+            "PDF Report", 
+            display_text="PDF"
+        ),
+        "Interactive Report": st.column_config.LinkColumn(
+            "Interactive Report", 
+            display_text="HTML"
+        ),
+        "SpO2 Snapshot": st.column_config.LinkColumn(
+            "SpO2 Snapshot", 
+            display_text="View"
+        )
+    }
+)
 
 
 
