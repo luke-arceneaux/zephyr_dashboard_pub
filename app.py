@@ -38,20 +38,6 @@ def make_clickable(label, url):
         return ""
     return f"[{label}]({url})"
 
-
-# def generate_presigned_url(s3_uri):
-#     if pd.isna(s3_uri) or not s3_uri:
-#         return None
-
-#     bucket, key = parse_s3_uri(s3_uri)
-
-#     s3 = boto3.client("s3")
-#     return s3.generate_presigned_url(
-#         ClientMethod="get_object",
-#         Params={"Bucket": bucket, "Key": key},
-#         ExpiresIn=PRESIGNED_EXPIRY
-#     )
-
 def generate_presigned_url(s3_uri):
     if not isinstance(s3_uri, str):
         return None
@@ -77,24 +63,6 @@ def generate_presigned_url(s3_uri):
     except Exception:
         return None
 
-
-# @st.cache_data
-# def add_presigned_links(df):
-#     df = df.copy()
-
-#     df["PDF Report"] = df["PDF Report"].apply(
-#         lambda x: make_clickable("PDF", generate_presigned_url(x))
-#     )
-
-#     df["Interactive Report"] = df["Interactive Report"].apply(
-#         lambda x: make_clickable("HTML", generate_presigned_url(x))
-#     )
-
-#     df["SpO2 Snapshot"] = df["SpO2 Snapshot"].apply(
-#         lambda x: make_clickable("View", generate_presigned_url(x))
-#     )
-
-#     return df
 @st.cache_data
 def add_presigned_links(df):
     df = df.copy()
@@ -220,28 +188,12 @@ DISPLAY_COLUMNS = [
     "SpO2 Snapshot"
 ]
 
-# table_df = subject_df[DISPLAY_COLUMNS].reset_index(drop=True)
+table_df = subject_df[DISPLAY_COLUMNS].reset_index(drop=True)
 
 st.subheader("Nights of Sleep")
 
-# st.dataframe(
-#     table_df,
-#     use_container_width=True,
-#     selection_mode="single-row",
-#     on_select="rerun",
-#     key="sleep_table"
-# )
-# st.dataframe(
-#     subject_df[DISPLAY_COLUMNS],
-#     use_container_width=True,
-#     column_config={
-#         "PDF_Report": st.column_config.MarkdownColumn("PDF Report"),
-#         "Interactive_Report": st.column_config.MarkdownColumn("Interactive Report"),
-#         "SpO2_Snapshot": st.column_config.MarkdownColumn("SpO₂ Plot")
-#     }
-# )
 st.dataframe(
-    subject_df[DISPLAY_COLUMNS],
+    table_df,
     use_container_width=True,
     column_config={
         "PDF Report": st.column_config.LinkColumn(
@@ -256,7 +208,8 @@ st.dataframe(
             "SpO2 Snapshot", 
             display_text="View"
         )
-    }
+    },
+    key="sleep_table"
 )
 
 
@@ -270,10 +223,10 @@ selection = st.session_state.get("sleep_table", {}).get("selection", {})
 
 if "rows" in selection and len(selection["rows"]) > 0:
     idx = selection["rows"][0]
-    row = subject_df.iloc[idx]
+    row = table_df.iloc[idx]
 
     st.divider()
-    # st.subheader(f"Session: {row['date']}")
+    st.subheader(f"Session: {row['Date']}")
 
     # ---- Report Links ----
     col1, col2 = st.columns(2)
