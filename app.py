@@ -222,33 +222,33 @@ st.subheader("Nights of Sleep")
 #     on_select="rerun",
 #     key="sleep_table"
 # )
-# st.dataframe(
-#     subject_df[DISPLAY_COLUMNS],
-#     use_container_width=True,
-#     column_config={
-#         "PDF_Report": st.column_config.MarkdownColumn("PDF Report"),
-#         "Interactive_Report": st.column_config.MarkdownColumn("Interactive Report"),
-#         "SpO2_Snapshot": st.column_config.MarkdownColumn("SpO₂ Plot")
-#     }
-# )
 st.dataframe(
     subject_df[DISPLAY_COLUMNS],
     use_container_width=True,
     column_config={
-        "PDF Report": st.column_config.LinkColumn(
-            "PDF Report", 
-            display_text="PDF"
-        ),
-        "Interactive Report": st.column_config.LinkColumn(
-            "Interactive Report", 
-            display_text="HTML"
-        ),
-        "SpO2 Snapshot": st.column_config.LinkColumn(
-            "SpO2 Snapshot", 
-            display_text="View"
-        )
+        "PDF_Report": st.column_config.MarkdownColumn("PDF Report"),
+        "Interactive_Report": st.column_config.MarkdownColumn("Interactive Report"),
+        "SpO2_Snapshot": st.column_config.MarkdownColumn("SpO₂ Plot")
     }
 )
+# st.dataframe(
+#     subject_df[DISPLAY_COLUMNS],
+#     use_container_width=True,
+#     column_config={
+#         "PDF Report": st.column_config.LinkColumn(
+#             "PDF Report", 
+#             display_text="PDF"
+#         ),
+#         "Interactive Report": st.column_config.LinkColumn(
+#             "Interactive Report", 
+#             display_text="HTML"
+#         ),
+#         "SpO2 Snapshot": st.column_config.LinkColumn(
+#             "SpO2 Snapshot", 
+#             display_text="View"
+#         )
+#     }
+# )
 
 
 
