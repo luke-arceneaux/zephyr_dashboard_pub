@@ -39,18 +39,44 @@ def make_clickable(label, url):
     return f"[{label}]({url})"
 
 
+# def generate_presigned_url(s3_uri):
+#     if pd.isna(s3_uri) or not s3_uri:
+#         return None
+
+#     bucket, key = parse_s3_uri(s3_uri)
+
+#     s3 = boto3.client("s3")
+#     return s3.generate_presigned_url(
+#         ClientMethod="get_object",
+#         Params={"Bucket": bucket, "Key": key},
+#         ExpiresIn=PRESIGNED_EXPIRY
+#     )
+
 def generate_presigned_url(s3_uri):
-    if pd.isna(s3_uri) or not s3_uri:
+    if not isinstance(s3_uri, str):
         return None
 
-    bucket, key = parse_s3_uri(s3_uri)
+    s3_uri = s3_uri.strip()
 
-    s3 = boto3.client("s3")
-    return s3.generate_presigned_url(
-        ClientMethod="get_object",
-        Params={"Bucket": bucket, "Key": key},
-        ExpiresIn=PRESIGNED_EXPIRY
-    )
+    if not s3_uri.startswith("s3://"):
+        return None
+
+    try:
+        bucket, key = parse_s3_uri(s3_uri)
+
+        if not bucket or not key:
+            return None
+
+        s3 = boto3.client("s3")
+        return s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket, "Key": key},
+            ExpiresIn=PRESIGNED_EXPIRY
+        )
+
+    except Exception:
+        return None
+
 
 @st.cache_data
 def add_presigned_links(df):
