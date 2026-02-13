@@ -8,7 +8,7 @@ from datetime import date, time
 # Config
 # -----------------------------
 
-METADATA_PATH = "zephyr_stereo_metadata_0.csv"
+METADATA_PATH = "zephyr_stereo_metadata.csv"
 
 PRESIGNED_EXPIRY = 3600  # seconds
 
@@ -220,6 +220,7 @@ st.dataframe(
 # -----------------------------
 
 selection = st.session_state.get("sleep_table", {}).get("selection", {})
+print(selection)
 
 if "rows" in selection and len(selection["rows"]) > 0:
     idx = selection["rows"][0]
