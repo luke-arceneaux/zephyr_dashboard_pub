@@ -1,18 +1,8 @@
 import streamlit as st
 import pandas as pd
-import boto3
-from urllib.parse import urlparse
-from datetime import date, time
 from filters import render_filters
-
-# -----------------------------
-# Config
-# -----------------------------
-
-PRESIGNED_EXPIRY = 3600  # seconds
-S3_BUCKET = "zephyrapptestbucket"
-S3_METADATA_KEY = "metadata/session_metadata.csv"
-
+from file_helpers import load_metadata, add_presigned_links
+from config import DISPLAY_COLUMNS
 
 st.set_page_config(
     page_title="Sleep Data Dashboard",
@@ -20,91 +10,13 @@ st.set_page_config(
 )
 
 # -----------------------------
-# Helpers
-# -----------------------------
-
-# @st.cache_data
-# def load_metadata():
-#     dtype={'Subject_ID': str, 'Session_ID': object}
-#     return pd.read_csv(METADATA_PATH, dtype=dtype)
-
-@st.cache_data(ttl=300)  # refresh every 5 minutes
-def load_metadata():
-    dtype = {"Subject_ID": str, "Session_ID": str}
-
-    s3 = boto3.client("s3")
-
-    obj = s3.get_object(
-        Bucket=S3_BUCKET,
-        Key=S3_METADATA_KEY
-    )
-
-    return pd.read_csv(obj["Body"], dtype=dtype)
-
-
-def parse_s3_uri(uri):
-    parsed = urlparse(uri)
-    bucket = parsed.netloc
-    key = parsed.path.lstrip("/")
-    return bucket, key
-
-# def make_clickable(label, url):
-#     if not url:
-#         return ""
-#     return f"[{label}]({url})"
-
-def generate_presigned_url(s3_uri):
-    if not isinstance(s3_uri, str):
-        return None
-
-    s3_uri = s3_uri.strip()
-
-    if not s3_uri.startswith("s3://"):
-        return None
-
-    try:
-        bucket, key = parse_s3_uri(s3_uri)
-
-        if not bucket or not key:
-            return None
-
-        s3 = boto3.client("s3")
-        return s3.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": bucket, "Key": key},
-            ExpiresIn=PRESIGNED_EXPIRY
-        )
-
-    except Exception:
-        return None
-
-@st.cache_data(ttl=PRESIGNED_EXPIRY-60)
-def add_presigned_links(df):
-    df = df.copy()
-
-    df["PDF Report"] = df["PDF Report"].apply(generate_presigned_url)
-    df["Interactive Report"] = df["Interactive Report"].apply(generate_presigned_url)
-    df["SpO2 Snapshot"] = df["SpO2 Snapshot"].apply(generate_presigned_url)
-
-    return df
-
-# def get_relevant_data(df):
-#     df = df[df.Date > date(2025, 1, 1)]
-#     # df = df[df["Duration (s)"] > 30*60]
-#     return df
-
-# -----------------------------
 # Load Data
 # -----------------------------
 
-df = load_metadata()
-print(df.head())
+df = load_metadata().copy()
+
 df["Date"] = pd.to_datetime(df["Date"]).dt.date
 df["Start Time"] = pd.to_datetime(df["Start Time"]).dt.time
-# df = add_date_and_start_time(df)
-# df = get_relevant_data(df)
-
-
 
 # -----------------------------
 # Header
@@ -112,7 +24,6 @@ df["Start Time"] = pd.to_datetime(df["Start Time"]).dt.time
 
 st.title("Sleep Data Dashboard")
 
-print(df.columns)
 st.caption(
     f"Last updated: {df['Date'].max() if len(df) else 'N/A'}"
 )
@@ -120,13 +31,6 @@ st.caption(
 # -----------------------------
 # Filter
 # -----------------------------
-
-# subjects = ["All Subjects"] + sorted(df["Subject_ID"].unique().tolist())
-
-# selected_subject = st.selectbox(
-#     "Select Subject",
-#     subjects
-# )
 
 start_date, end_date, min_duration, selected_subject = render_filters(df)
 
@@ -139,7 +43,7 @@ filtered_df = df[
 if selected_subject != "All Subjects":
     filtered_df = filtered_df[filtered_df["Subject_ID"] == selected_subject]
 
-filtered_df.sort_values("Date", ascending=False, inplace=True) #sort by subject ID?
+filtered_df = filtered_df.sort_values("Date", ascending=False) # sort by subject ID?
 
 filtered_df = add_presigned_links(filtered_df)
 
@@ -149,7 +53,6 @@ if filtered_df.empty:
 
 
 st.divider()
-
 
 # -----------------------------
 # Subject Summary
@@ -162,14 +65,23 @@ col1.metric("Nights Recorded", len(filtered_df))
 if selected_subject == "All Subjects":
     col2.metric("Unique Subjects", filtered_df["Subject_ID"].nunique())
 else:
-    col2.metric("Avg ODI", round(filtered_df["ODI"].mean(), 2) if not filtered_df.empty else "N/A")
+    if not filtered_df.empty:
+        col2.metric(
+            "Avg ODI",
+            f"{filtered_df['ODI'].mean():.2f}",
+            f"±{filtered_df['ODI'].std():.2f}"
+        )
+    else:
+        col2.metric("Avg ODI", "N/A")
 
-
-col3.metric(
-    "Avg Hypoxic Burden",
-    round(filtered_df["Hypoxic Burden (4%)"].mean(), 2)
-    if not filtered_df.empty else "N/A"
-)
+if not filtered_df.empty:
+    col3.metric(
+        "Avg Hypoxic Burden",
+        f"{filtered_df['Hypoxic Burden (4%)'].mean():.2f}",
+        f"±{filtered_df['Hypoxic Burden (4%)'].std():.2f}"
+    )
+else:
+    col3.metric("Avg Hypoxic Burden", "N/A")
 
 
 st.divider()
@@ -177,32 +89,6 @@ st.divider()
 # -----------------------------
 # Session Table
 # -----------------------------
-
-DISPLAY_COLUMNS = [
-    "Subject_ID",
-    "Session_ID",
-    "Date",
-    "Start Time",
-    "Duration (min)",
-    "ODI",
-    "NST Count",
-    "Desat Count (3%)",
-    "Desat Count (4%)",
-    "Desat Count (sub 90%)",
-    "Hypoxic Burden (4%)",
-    "Min SpO2",
-    "T90_perc",
-    "T90_min",
-    "supine_proportion",
-    "prone_proportion",
-    "left_proportion",
-    "right_proportion",
-    "upright_proportion",
-    "non_supine_proportion",
-    "PDF Report",
-    "Interactive Report",
-    "SpO2 Snapshot"
-]
 
 table_df = filtered_df[DISPLAY_COLUMNS].round(2).reset_index(drop=True)
 
@@ -228,52 +114,14 @@ st.dataframe(
     key="sleep_table"
 )
 
-
-
-
 # -----------------------------
-# Row Selection Handling
+# SpO₂ Plot Gallery
 # -----------------------------
-
-# selection = st.session_state.get("sleep_table", {}).get("selection", {})
-# print(selection)
-
-# if "rows" in selection and len(selection["rows"]) > 0:
-#     idx = selection["rows"][0]
-#     row = table_df.iloc[idx]
-
-#     st.divider()
-#     st.subheader(f"Session: {row['Date']}")
-
-#     # ---- Report Links ----
-#     col1, col2 = st.columns(2)
-
-#     with col1:
-#         if row["report_pdf_s3_uri"]:
-#             pdf_url = generate_presigned_url(row["report_pdf_s3_uri"])
-#             st.link_button("Open PDF Report", pdf_url)
-#         else:
-#             st.caption("PDF report not available")
-
-#     with col2:
-#         if row["report_html_s3_uri"]:
-#             html_url = generate_presigned_url(row["report_html_s3_uri"])
-#             st.link_button("Open HTML Report", html_url)
-#         else:
-#             st.caption("HTML report not available")
-
-#     # ---- SpO2 Plot Preview ----
-#     st.subheader("SpO₂ Plot")
-
-#     if pd.isna(row["spo2_plot_png_s3_uri"]) or not row["spo2_plot_png_s3_uri"]:
-#         st.warning("No SpO₂ plot available for this session.")
-#     else:
-#         plot_url = generate_presigned_url(row["spo2_plot_png_s3_uri"])
-#         st.image(plot_url, use_container_width=True)
 
 st.divider()
 st.subheader("SpO₂ Plot Comparison")
 
+# Plot selection
 col1, _ = st.columns([1, 4])
 with col1:
     max_plots = st.number_input(
@@ -292,6 +140,7 @@ with col1:
 if generate_gallery:
     st.session_state["show_spo2_gallery"] = True
 
+# Reset gallery if filters change
 if "last_filter_hash" not in st.session_state:
     st.session_state.last_filter_hash = None
 
@@ -301,7 +150,7 @@ if filter_hash != st.session_state.last_filter_hash:
     st.session_state["show_spo2_gallery"] = False
     st.session_state.last_filter_hash = filter_hash
 
-
+# Display gallery if flag is set
 if st.session_state.get("show_spo2_gallery", False):
 
     gallery_df = filtered_df[
@@ -330,7 +179,6 @@ if st.session_state.get("show_spo2_gallery", False):
                     unsafe_allow_html=True
                 )
 
-                # plot_url = generate_presigned_url(row["SpO2 Snapshot"])
                 plot_url = row["SpO2 Snapshot"] if row["SpO2 Snapshot"] else None
 
                 if plot_url:
@@ -369,8 +217,11 @@ if st.session_state.get("show_spo2_gallery", False):
 st.divider()
 st.subheader("Trends")
 
-trend_df = filtered_df.sort_values("Date")
+df["DateTime"] = pd.to_datetime(df["Date"] + " " + df["Start Time"])
+trend_df = filtered_df.sort_values("DateTime")
 
 st.line_chart(
-    trend_df.set_index("Date")[["ODI", "Hypoxic Burden (4%)"]]
+    trend_df,
+    x="DateTime",
+    y=["ODI", "Hypoxic Burden (4%)"]
 )
