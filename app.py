@@ -181,7 +181,7 @@ DISPLAY_COLUMNS = [
     "Session_ID",
     "Date",
     "Start Time",
-    "Duration (s)",
+    "Duration (min)",
     "ODI",
     "NST Count",
     "Desat Count (3%)",
