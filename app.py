@@ -35,6 +35,11 @@ st.caption(
 start_date, end_date, min_duration, selected_subject = render_filters(df)
 
 print(f"Filters - Start: {start_date}, End: {end_date}, Min Duration: {min_duration}, Subject: {selected_subject}")
+if type(start_date) =="tuple":
+    start_date = start_date[0]
+if type(end_date) =="tuple":
+    end_date = end_date[1]
+    
 filtered_df = df[
     (df["Date"] >= start_date) &
     (df["Date"] <= end_date) &
@@ -97,7 +102,7 @@ st.subheader("Nights of Sleep")
 
 st.dataframe(
     table_df,
-    use_container_width=True,
+    width=True,
     column_config={
         "PDF Report": st.column_config.LinkColumn(
             "PDF Report", 
@@ -185,7 +190,7 @@ if st.session_state.get("show_spo2_gallery", False):
                 if plot_url:
                     st.image(
                         plot_url,
-                        use_container_width=True
+                        width=True
                     )
                 else:
                     st.caption("No plot")
