@@ -285,18 +285,20 @@ if "rows" in selection and len(selection["rows"]) > 0:
 st.divider()
 st.subheader("SpO₂ Plot Comparison")
 
-max_plots = st.number_input(
-    "Max plots to display",
-    min_value=1,
-    max_value=50,
-    value=20,
-    step=1
-)
+col1, _ = st.columns([1, 4])
+with col1:
+    max_plots = st.number_input(
+        "Max plots to display",
+        min_value=1,
+        max_value=50,
+        value=20,
+        step=1
+    )
 
-generate_gallery = st.button(
-    "Generate SpO₂ Thumbnail Gallery",
-    type="primary"
-)
+    generate_gallery = st.button(
+        "Generate SpO₂ Thumbnail Gallery",
+        type="primary"
+    )
 
 if generate_gallery:
     st.session_state["show_spo2_gallery"] = True
@@ -366,11 +368,11 @@ if st.session_state.get("show_spo2_gallery", False):
 # Trend Plots
 # -----------------------------
 
-# st.divider()
-# st.subheader("Trends")
+st.divider()
+st.subheader("Trends")
 
-# trend_df = subject_df.sort_values("date")
+trend_df = subject_df.sort_values("date")
 
-# st.line_chart(
-#     trend_df.set_index("date")[["ODI", "hypoxic_burden"]]
-# )
+st.line_chart(
+    trend_df.set_index("date")[["ODI", "Hypoxic Burden (4%)"]]
+)
