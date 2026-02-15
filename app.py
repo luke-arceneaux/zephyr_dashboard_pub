@@ -33,20 +33,16 @@ st.caption(
 # -----------------------------
 
 start_date, end_date, min_duration, selected_subject = render_filters(df)
-st.session_state["filters"] = {
-    "start_date": start_date,
-    "end_date": end_date,
-    "min_duration": min_duration,
-    "selected_subject": selected_subject
-}
+
+print(f"Filters - Start: {start_date}, End: {end_date}, Min Duration: {min_duration}, Subject: {selected_subject}")
 filtered_df = df[
-    (df["Date"] >= st.session_state["filters"]["start_date"]) &
-    (df["Date"] <= st.session_state["filters"]["end_date"]) &
-    (df["Duration (min)"] >= st.session_state["filters"]["min_duration"])
+    (df["Date"] >= start_date) &
+    (df["Date"] <= end_date) &
+    (df["Duration (min)"] >= min_duration)
 ]
 
-if st.session_state["filters"]["selected_subject"] != "All Subjects":
-    filtered_df = filtered_df[filtered_df["Subject_ID"] == st.session_state["filters"]["selected_subject"]]
+if selected_subject != "All Subjects":
+    filtered_df = filtered_df[filtered_df["Subject_ID"] == selected_subject]
 
 filtered_df = filtered_df.sort_values("Date", ascending=False) # sort by subject ID?
 
