@@ -21,13 +21,8 @@ def render_filters(df):
             max_value=max_date
         )
         # Handle single-date edge case
-        if isinstance(date_range, (tuple, list)):
-            if len(date_range) == 2:
-                start_date, end_date = date_range
-            elif len(date_range) == 1:
-                start_date = end_date = date_range[0]
-            else:
-                start_date = end_date = min_date
+        if isinstance(date_range, tuple) and len(date_range) == 2:
+            start_date, end_date = date_range
         else:
             start_date = end_date = date_range
     with col2:
