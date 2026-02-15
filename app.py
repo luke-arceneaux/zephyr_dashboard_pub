@@ -48,10 +48,10 @@ def parse_s3_uri(uri):
     key = parsed.path.lstrip("/")
     return bucket, key
 
-def make_clickable(label, url):
-    if not url:
-        return ""
-    return f"[{label}]({url})"
+# def make_clickable(label, url):
+#     if not url:
+#         return ""
+#     return f"[{label}]({url})"
 
 def generate_presigned_url(s3_uri):
     if not isinstance(s3_uri, str):
@@ -78,7 +78,7 @@ def generate_presigned_url(s3_uri):
     except Exception:
         return None
 
-@st.cache_data
+@st.cache_data(ttl=PRESIGNED_EXPIRY-60)
 def add_presigned_links(df):
     df = df.copy()
 
@@ -88,32 +88,10 @@ def add_presigned_links(df):
 
     return df
 
-
-def add_date_and_start_time(df):
-    """
-    Adds 'date' and 'start_time' columns to the DataFrame, parsed from Session_ID.
-    """
-    def parse_session_id(session):
-        try:
-            year = int(str(session)[:4])
-            month = int(str(session)[4:6])
-            day = int(str(session)[6:8])
-            hour = int(str(session)[8:10])
-            minute = int(str(session)[10:12])
-            second = int(str(session)[12:])
-            return date(year, month, day), time(hour, minute, second)
-        except Exception:
-            return date(2024, 1, 1), time(0, 0, 0)
-    
-    df = df.copy()
-    df['date'], df['start_time'] = zip(*df['Session_ID'].map(parse_session_id))
-    df["Session_ID"] = df["Session_ID"].astype(str)
-    return df
-
-def get_relevant_data(df):
-    df = df[df.Date > date(2025, 1, 1)]
-    # df = df[df["Duration (s)"] > 30*60]
-    return df
+# def get_relevant_data(df):
+#     df = df[df.Date > date(2025, 1, 1)]
+#     # df = df[df["Duration (s)"] > 30*60]
+#     return df
 
 # -----------------------------
 # Load Data
@@ -158,12 +136,17 @@ filtered_df = df[
     (df["Duration (min)"] >= min_duration)
 ]
 
-if selected_subject == "All Subjects":
-    subject_df = filtered_df.sort_values(["Subject_ID", "Date"])
-else:
-    subject_df = filtered_df[filtered_df["Subject_ID"] == selected_subject].sort_values("Date")
+if selected_subject != "All Subjects":
+    subject_df = filtered_df[filtered_df["Subject_ID"] == selected_subject]
+
+subject_df.sort_values("Date", ascending=False, inplace=True) #sort by subject ID?
 
 subject_df = add_presigned_links(subject_df)
+
+if subject_df.empty:
+    st.warning("No sessions match the selected filters.")
+    st.stop()
+
 
 st.divider()
 
@@ -179,9 +162,15 @@ col1.metric("Nights Recorded", len(subject_df))
 if selected_subject == "All Subjects":
     col2.metric("Unique Subjects", subject_df["Subject_ID"].nunique())
 else:
-    col2.metric("Avg ODI", round(subject_df["ODI"].mean(), 2))
+    col2.metric("Avg ODI", round(subject_df["ODI"].mean(), 2) if not subject_df.empty else "N/A")
 
-col3.metric("Avg Hypoxic Burden", round(subject_df["Hypoxic Burden (4%)"].mean(), 2))
+
+col3.metric(
+    "Avg Hypoxic Burden",
+    round(subject_df["Hypoxic Burden (4%)"].mean(), 2)
+    if not subject_df.empty else "N/A"
+)
+
 
 st.divider()
 
@@ -215,7 +204,7 @@ DISPLAY_COLUMNS = [
     "SpO2 Snapshot"
 ]
 
-table_df = subject_df[DISPLAY_COLUMNS].reset_index(drop=True)
+table_df = subject_df[DISPLAY_COLUMNS].round(2).reset_index(drop=True)
 
 st.subheader("Nights of Sleep")
 
@@ -246,41 +235,41 @@ st.dataframe(
 # Row Selection Handling
 # -----------------------------
 
-selection = st.session_state.get("sleep_table", {}).get("selection", {})
-print(selection)
+# selection = st.session_state.get("sleep_table", {}).get("selection", {})
+# print(selection)
 
-if "rows" in selection and len(selection["rows"]) > 0:
-    idx = selection["rows"][0]
-    row = table_df.iloc[idx]
+# if "rows" in selection and len(selection["rows"]) > 0:
+#     idx = selection["rows"][0]
+#     row = table_df.iloc[idx]
 
-    st.divider()
-    st.subheader(f"Session: {row['Date']}")
+#     st.divider()
+#     st.subheader(f"Session: {row['Date']}")
 
-    # ---- Report Links ----
-    col1, col2 = st.columns(2)
+#     # ---- Report Links ----
+#     col1, col2 = st.columns(2)
 
-    with col1:
-        if row["report_pdf_s3_uri"]:
-            pdf_url = generate_presigned_url(row["report_pdf_s3_uri"])
-            st.link_button("Open PDF Report", pdf_url)
-        else:
-            st.caption("PDF report not available")
+#     with col1:
+#         if row["report_pdf_s3_uri"]:
+#             pdf_url = generate_presigned_url(row["report_pdf_s3_uri"])
+#             st.link_button("Open PDF Report", pdf_url)
+#         else:
+#             st.caption("PDF report not available")
 
-    with col2:
-        if row["report_html_s3_uri"]:
-            html_url = generate_presigned_url(row["report_html_s3_uri"])
-            st.link_button("Open HTML Report", html_url)
-        else:
-            st.caption("HTML report not available")
+#     with col2:
+#         if row["report_html_s3_uri"]:
+#             html_url = generate_presigned_url(row["report_html_s3_uri"])
+#             st.link_button("Open HTML Report", html_url)
+#         else:
+#             st.caption("HTML report not available")
 
-    # ---- SpO2 Plot Preview ----
-    st.subheader("SpO₂ Plot")
+#     # ---- SpO2 Plot Preview ----
+#     st.subheader("SpO₂ Plot")
 
-    if pd.isna(row["spo2_plot_png_s3_uri"]) or not row["spo2_plot_png_s3_uri"]:
-        st.warning("No SpO₂ plot available for this session.")
-    else:
-        plot_url = generate_presigned_url(row["spo2_plot_png_s3_uri"])
-        st.image(plot_url, use_container_width=True)
+#     if pd.isna(row["spo2_plot_png_s3_uri"]) or not row["spo2_plot_png_s3_uri"]:
+#         st.warning("No SpO₂ plot available for this session.")
+#     else:
+#         plot_url = generate_presigned_url(row["spo2_plot_png_s3_uri"])
+#         st.image(plot_url, use_container_width=True)
 
 st.divider()
 st.subheader("SpO₂ Plot Comparison")
@@ -302,6 +291,15 @@ with col1:
 
 if generate_gallery:
     st.session_state["show_spo2_gallery"] = True
+
+if "last_filter_hash" not in st.session_state:
+    st.session_state.last_filter_hash = None
+
+filter_hash = (start_date, end_date, min_duration, selected_subject)
+
+if filter_hash != st.session_state.last_filter_hash:
+    st.session_state["show_spo2_gallery"] = False
+    st.session_state.last_filter_hash = filter_hash
 
 
 if st.session_state.get("show_spo2_gallery", False):
