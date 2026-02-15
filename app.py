@@ -285,22 +285,18 @@ if "rows" in selection and len(selection["rows"]) > 0:
 st.divider()
 st.subheader("SpO₂ Plot Comparison")
 
-col1, col2 = st.columns([1, 3])
+max_plots = st.number_input(
+    "Max plots to display",
+    min_value=1,
+    max_value=50,
+    value=20,
+    step=1
+)
 
-with col1:
-    max_plots = st.number_input(
-        "Max plots to display",
-        min_value=1,
-        max_value=50,
-        value=20,
-        step=1
-    )
-
-with col2:
-    generate_gallery = st.button(
-        "Generate SpO₂ Thumbnail Gallery",
-        type="primary"
-    )
+generate_gallery = st.button(
+    "Generate SpO₂ Thumbnail Gallery",
+    type="primary"
+)
 
 if generate_gallery:
     st.session_state["show_spo2_gallery"] = True
@@ -330,7 +326,7 @@ if st.session_state.get("show_spo2_gallery", False):
 
             with col:
                 st.markdown(
-                    f"**{row['Subject_ID']}**<br>{row['Date']}",
+                    f"**Subject: {row['Subject_ID']}**<br>{row['Date']}",
                     unsafe_allow_html=True
                 )
 
