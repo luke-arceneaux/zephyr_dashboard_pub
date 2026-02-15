@@ -3,6 +3,7 @@ import pandas as pd
 import boto3
 from urllib.parse import urlparse
 from datetime import date, time
+from filters import render_filters
 
 # -----------------------------
 # Config
@@ -123,7 +124,9 @@ print(df.head())
 df["Date"] = pd.to_datetime(df["Date"]).dt.date
 df["Start Time"] = pd.to_datetime(df["Start Time"]).dt.time
 # df = add_date_and_start_time(df)
-df = get_relevant_data(df)
+# df = get_relevant_data(df)
+
+
 
 # -----------------------------
 # Header
@@ -137,7 +140,7 @@ st.caption(
 )
 
 # -----------------------------
-# Subject Filter
+# Filter
 # -----------------------------
 
 subjects = ["All Subjects"] + sorted(df["Subject_ID"].unique().tolist())
@@ -147,10 +150,18 @@ selected_subject = st.selectbox(
     subjects
 )
 
+start_date, end_date, min_duration = render_filters(df)
+
+filtered_df = df[
+    (df["Date"] >= start_date) &
+    (df["Date"] <= end_date) &
+    (df["Duration (min)"] >= min_duration)
+]
+
 if selected_subject == "All Subjects":
-    subject_df = df.sort_values(["Subject_ID", "Date"])
+    subject_df = filtered_df.sort_values(["Subject_ID", "Date"])
 else:
-    subject_df = df[df["Subject_ID"] == selected_subject].sort_values("Date")
+    subject_df = filtered_df[filtered_df["Subject_ID"] == selected_subject].sort_values("Date")
 
 subject_df = add_presigned_links(subject_df)
 
@@ -268,6 +279,89 @@ if "rows" in selection and len(selection["rows"]) > 0:
     else:
         plot_url = generate_presigned_url(row["spo2_plot_png_s3_uri"])
         st.image(plot_url, use_container_width=True)
+
+st.divider()
+st.subheader("SpO₂ Plot Comparison")
+
+col1, col2 = st.columns([1, 3])
+
+with col1:
+    max_plots = st.number_input(
+        "Max plots to display",
+        min_value=1,
+        max_value=50,
+        value=20,
+        step=1
+    )
+
+with col2:
+    generate_gallery = st.button(
+        "Generate SpO₂ Thumbnail Gallery",
+        type="primary"
+    )
+
+if generate_gallery:
+    st.session_state["show_spo2_gallery"] = True
+
+
+if st.session_state.get("show_spo2_gallery", False):
+
+    gallery_df = subject_df[
+        subject_df["SpO2 Snapshot"].notna() &
+        (subject_df["SpO2 Snapshot"] != "")
+    ].head(max_plots)
+
+    if gallery_df.empty:
+        st.warning("No SpO₂ plots available for the current filters.")
+    else:
+        st.caption(
+            f"Displaying {len(gallery_df)} SpO₂ plots "
+            f"(filtered, capped at {max_plots})"
+        )
+
+        # ---- Thumbnail grid ----
+        NUM_COLS = 4
+        cols = st.columns(NUM_COLS)
+
+        for idx, (_, row) in enumerate(gallery_df.iterrows()):
+            col = cols[idx % NUM_COLS]
+
+            with col:
+                st.markdown(
+                    f"**{row['Subject_ID']}**<br>{row['Date']}",
+                    unsafe_allow_html=True
+                )
+
+                plot_url = generate_presigned_url(row["SpO2 Snapshot"])
+
+                if plot_url:
+                    st.image(
+                        plot_url,
+                        use_container_width=True
+                    )
+                else:
+                    st.caption("No plot")
+
+# st.divider()
+# st.subheader("Enlarge SpO₂ Plot")
+
+# options = [
+#     f"{row.Subject_ID} – {row.Date}"
+#     for _, row in gallery_df.iterrows()
+# ]
+
+# selected = st.selectbox(
+#     "Select plot to enlarge",
+#     options,
+#     index=0
+# )
+
+# selected_row = gallery_df.iloc[options.index(selected)]
+
+# plot_url = generate_presigned_url(selected_row["SpO2 Snapshot"])
+# st.image(plot_url, use_container_width=True)
+
+
 
 # -----------------------------
 # Trend Plots
