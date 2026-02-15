@@ -15,8 +15,8 @@ st.set_page_config(
 
 df = load_metadata().copy()
 
-df["Date"] = pd.to_datetime(df["Date"]).dt.date
-df["Start Time"] = pd.to_datetime(df["Start Time"]).dt.time
+df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%Y")
+df["Start Time"] = pd.to_datetime(df["Start Time"], format="%H:%M:%S").dt.time
 
 # -----------------------------
 # Header
