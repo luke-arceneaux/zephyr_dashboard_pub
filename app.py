@@ -165,6 +165,8 @@ else:
 
 subject_df = add_presigned_links(subject_df)
 
+st.divider()
+
 
 # -----------------------------
 # Subject Summary
@@ -332,7 +334,8 @@ if st.session_state.get("show_spo2_gallery", False):
                     unsafe_allow_html=True
                 )
 
-                plot_url = generate_presigned_url(row["SpO2 Snapshot"])
+                # plot_url = generate_presigned_url(row["SpO2 Snapshot"])
+                plot_url = row["SpO2 Snapshot"] if row["SpO2 Snapshot"] else None
 
                 if plot_url:
                     st.image(
