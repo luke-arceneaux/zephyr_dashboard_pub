@@ -35,11 +35,7 @@ st.caption(
 start_date, end_date, min_duration, selected_subject = render_filters(df)
 
 print(f"Filters - Start: {start_date}, End: {end_date}, Min Duration: {min_duration}, Subject: {selected_subject}")
-if type(start_date) =="tuple":
-    start_date = start_date[0]
-if type(end_date) =="tuple":
-    end_date = end_date[1]
-    
+
 filtered_df = df[
     (df["Date"] >= start_date) &
     (df["Date"] <= end_date) &
