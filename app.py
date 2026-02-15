@@ -8,9 +8,10 @@ from datetime import date, time
 # Config
 # -----------------------------
 
-METADATA_PATH = "zephyr_stereo_metadata.csv"
-
 PRESIGNED_EXPIRY = 3600  # seconds
+S3_BUCKET = "zephyrapptestbucket"
+S3_METADATA_KEY = "metadata/session_metadata.csv"
+
 
 st.set_page_config(
     page_title="Sleep Data Dashboard",
@@ -21,10 +22,23 @@ st.set_page_config(
 # Helpers
 # -----------------------------
 
-@st.cache_data
+# @st.cache_data
+# def load_metadata():
+#     dtype={'Subject_ID': str, 'Session_ID': object}
+#     return pd.read_csv(METADATA_PATH, dtype=dtype)
+
+@st.cache_data(ttl=300)  # refresh every 5 minutes
 def load_metadata():
-    dtype={'Subject_ID': str, 'Session_ID': object}
-    return pd.read_csv(METADATA_PATH, dtype=dtype)
+    dtype = {"Subject_ID": str, "Session_ID": str}
+
+    s3 = boto3.client("s3")
+
+    obj = s3.get_object(
+        Bucket=S3_BUCKET,
+        Key=S3_METADATA_KEY
+    )
+
+    return pd.read_csv(obj["Body"], dtype=dtype)
 
 
 def parse_s3_uri(uri):
@@ -97,7 +111,7 @@ def add_date_and_start_time(df):
 
 def get_relevant_data(df):
     df = df[df.Date > date(2025, 1, 1)]
-    df = df[df["Duration (s)"] > 30*60]
+    # df = df[df["Duration (s)"] > 30*60]
     return df
 
 # -----------------------------
