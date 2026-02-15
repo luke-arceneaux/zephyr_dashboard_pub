@@ -371,8 +371,8 @@ if st.session_state.get("show_spo2_gallery", False):
 st.divider()
 st.subheader("Trends")
 
-trend_df = subject_df.sort_values("date")
+trend_df = subject_df.sort_values("Date")
 
 st.line_chart(
-    trend_df.set_index("date")[["ODI", "Hypoxic Burden (4%)"]]
+    trend_df.set_index("Date")[["ODI", "Hypoxic Burden (4%)"]]
 )
