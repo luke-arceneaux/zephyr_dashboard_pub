@@ -143,14 +143,14 @@ st.caption(
 # Filter
 # -----------------------------
 
-subjects = ["All Subjects"] + sorted(df["Subject_ID"].unique().tolist())
+# subjects = ["All Subjects"] + sorted(df["Subject_ID"].unique().tolist())
 
-selected_subject = st.selectbox(
-    "Select Subject",
-    subjects
-)
+# selected_subject = st.selectbox(
+#     "Select Subject",
+#     subjects
+# )
 
-start_date, end_date, min_duration = render_filters(df)
+start_date, end_date, min_duration, selected_subject = render_filters(df)
 
 filtered_df = df[
     (df["Date"] >= start_date) &
