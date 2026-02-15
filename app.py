@@ -102,7 +102,7 @@ st.subheader("Nights of Sleep")
 
 st.dataframe(
     table_df,
-    width=True,
+    use_container_width==True,
     column_config={
         "PDF Report": st.column_config.LinkColumn(
             "PDF Report", 
@@ -190,7 +190,7 @@ if st.session_state.get("show_spo2_gallery", False):
                 if plot_url:
                     st.image(
                         plot_url,
-                        width=True
+                        use_container_width===True
                     )
                 else:
                     st.caption("No plot")
@@ -215,7 +215,7 @@ if st.session_state.get("show_spo2_gallery", False):
 # st.image(plot_url, use_container_width=True)
 
 
-
+    
 # -----------------------------
 # Trend Plots
 # -----------------------------
