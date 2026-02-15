@@ -137,13 +137,13 @@ filtered_df = df[
 ]
 
 if selected_subject != "All Subjects":
-    subject_df = filtered_df[filtered_df["Subject_ID"] == selected_subject]
+    filtered_df = filtered_df[filtered_df["Subject_ID"] == selected_subject]
 
-subject_df.sort_values("Date", ascending=False, inplace=True) #sort by subject ID?
+filtered_df.sort_values("Date", ascending=False, inplace=True) #sort by subject ID?
 
-subject_df = add_presigned_links(subject_df)
+filtered_df = add_presigned_links(filtered_df)
 
-if subject_df.empty:
+if filtered_df.empty:
     st.warning("No sessions match the selected filters.")
     st.stop()
 
@@ -157,18 +157,18 @@ st.divider()
 
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Nights Recorded", len(subject_df))
+col1.metric("Nights Recorded", len(filtered_df))
 
 if selected_subject == "All Subjects":
-    col2.metric("Unique Subjects", subject_df["Subject_ID"].nunique())
+    col2.metric("Unique Subjects", filtered_df["Subject_ID"].nunique())
 else:
-    col2.metric("Avg ODI", round(subject_df["ODI"].mean(), 2) if not subject_df.empty else "N/A")
+    col2.metric("Avg ODI", round(filtered_df["ODI"].mean(), 2) if not filtered_df.empty else "N/A")
 
 
 col3.metric(
     "Avg Hypoxic Burden",
-    round(subject_df["Hypoxic Burden (4%)"].mean(), 2)
-    if not subject_df.empty else "N/A"
+    round(filtered_df["Hypoxic Burden (4%)"].mean(), 2)
+    if not filtered_df.empty else "N/A"
 )
 
 
@@ -204,7 +204,7 @@ DISPLAY_COLUMNS = [
     "SpO2 Snapshot"
 ]
 
-table_df = subject_df[DISPLAY_COLUMNS].round(2).reset_index(drop=True)
+table_df = filtered_df[DISPLAY_COLUMNS].round(2).reset_index(drop=True)
 
 st.subheader("Nights of Sleep")
 
@@ -304,9 +304,9 @@ if filter_hash != st.session_state.last_filter_hash:
 
 if st.session_state.get("show_spo2_gallery", False):
 
-    gallery_df = subject_df[
-        subject_df["SpO2 Snapshot"].notna() &
-        (subject_df["SpO2 Snapshot"] != "")
+    gallery_df = filtered_df[
+        filtered_df["SpO2 Snapshot"].notna() &
+        (filtered_df["SpO2 Snapshot"] != "")
     ].head(max_plots)
 
     if gallery_df.empty:
@@ -369,7 +369,7 @@ if st.session_state.get("show_spo2_gallery", False):
 st.divider()
 st.subheader("Trends")
 
-trend_df = subject_df.sort_values("Date")
+trend_df = filtered_df.sort_values("Date")
 
 st.line_chart(
     trend_df.set_index("Date")[["ODI", "Hypoxic Burden (4%)"]]
