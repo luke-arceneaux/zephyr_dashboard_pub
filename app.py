@@ -69,7 +69,7 @@ else:
         col2.metric(
             "Avg ODI",
             f"{filtered_df['ODI'].mean():.2f}",
-            f"±{filtered_df['ODI'].std():.2f}"
+            # f"±{filtered_df['ODI'].std():.2f}"
         )
     else:
         col2.metric("Avg ODI", "N/A")
@@ -78,7 +78,7 @@ if not filtered_df.empty:
     col3.metric(
         "Avg Hypoxic Burden",
         f"{filtered_df['Hypoxic Burden (4%)'].mean():.2f}",
-        f"±{filtered_df['Hypoxic Burden (4%)'].std():.2f}"
+        # f"±{filtered_df['Hypoxic Burden (4%)'].std():.2f}"
     )
 else:
     col3.metric("Avg Hypoxic Burden", "N/A")
@@ -217,11 +217,11 @@ if st.session_state.get("show_spo2_gallery", False):
 st.divider()
 st.subheader("Trends")
 
-df["DateTime"] = pd.to_datetime(df["Date"] + " " + df["Start Time"])
-trend_df = filtered_df.sort_values("DateTime")
+# df["DateTime"] = pd.to_datetime(df["Date"] + " " + df["Start Time"])
+trend_df = filtered_df.sort_values("Date")
 
 st.line_chart(
     trend_df,
-    x="DateTime",
+    x="Date",
     y=["ODI", "Hypoxic Burden (4%)"]
 )
