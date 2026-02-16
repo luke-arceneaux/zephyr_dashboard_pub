@@ -138,6 +138,12 @@ with col1:
         step=1
     )
 
+    link_target = st.segmented_control(
+        "Clicking thumbnails opens",
+        ["Interactive HTML", "PDF Report"],
+        default="Interactive HTML"
+    )
+
     generate_gallery = st.button(
         "Generate SpO₂ Thumbnail Gallery",
         type="primary"
@@ -185,20 +191,20 @@ if st.session_state.get("show_spo2_gallery", False):
                     unsafe_allow_html=True
                 )
 
+                pdf_url = row["PDF Report"]
+                html_url = row["Interactive Report"]
                 plot_url = row["SpO2 Snapshot"] if row["SpO2 Snapshot"] else None
 
-                # if plot_url:
-                #     st.image(
-                #         plot_url,
-                #         use_container_width=True
-                #     )
-                # else:
-                #     st.caption("No plot")
+                if link_target == "Interactive HTML":
+                    print("Link target: Interactive HTML")
+                    target_url = html_url if html_url else pdf_url
+                elif link_target == "PDF Report":
+                    print("Link target: PDF Report")
+                    target_url = pdf_url if pdf_url else html_url
+                else:
+                    target_url = None
 
-                pdf_url = row["PDF Report"]
-                plot_url = row["SpO2 Snapshot"]
-
-                if plot_url and pdf_url:
+                if plot_url and target_url:
                     # st.markdown(
                     #     f"""
                     #     <a href="{pdf_url}" target="_blank">
@@ -220,7 +226,7 @@ if st.session_state.get("show_spo2_gallery", False):
                         }}
                         </style>
 
-                        <a href="{pdf_url}" target="_blank" style="text-decoration:none;">
+                        <a href="{target_url}" target="_blank" style="text-decoration:none;">
                             <img src="{plot_url}" class="spo2-thumb" style="width:100%;" />
                         </a>
                         """,
