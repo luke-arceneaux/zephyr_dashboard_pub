@@ -199,19 +199,39 @@ if st.session_state.get("show_spo2_gallery", False):
                 plot_url = row["SpO2 Snapshot"]
 
                 if plot_url and pdf_url:
+                    # st.markdown(
+                    #     f"""
+                    #     <a href="{pdf_url}" target="_blank">
+                    #         <img src="{plot_url}" style="width:100%; border-radius:6px;" />
+                    #     </a>
+                    #     """,
+                    #     unsafe_allow_html=True,
+                    # )
                     st.markdown(
                         f"""
-                        <a href="{pdf_url}" target="_blank">
-                            <img src="{plot_url}" style="width:100%; border-radius:6px;" />
+                        <style>
+                        .spo2-thumb {{
+                            border-radius:8px;
+                            cursor:pointer;
+                            transition: transform 0.15s ease-in-out;
+                        }}
+                        .spo2-thumb:hover {{
+                            transform: scale(1.02);
+                        }}
+                        </style>
+
+                        <a href="{pdf_url}" target="_blank" style="text-decoration:none;">
+                            <img src="{plot_url}" class="spo2-thumb" style="width:100%;" />
                         </a>
                         """,
-                        unsafe_allow_html=True,
-                        style="width:100%; border-radius:6px; cursor:pointer;"
+                        unsafe_allow_html=True
                     )
                 elif plot_url:
                     st.image(plot_url, use_container_width=True)
                 else:
                     st.caption("No plot")
+
+                
 
 
 # st.divider()
