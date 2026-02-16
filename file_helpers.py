@@ -17,17 +17,11 @@ def load_metadata():
 
     return pd.read_csv(obj["Body"], dtype=dtype)
 
-
 def parse_s3_uri(uri):
     parsed = urlparse(uri)
     bucket = parsed.netloc
     key = parsed.path.lstrip("/")
     return bucket, key
-
-# def make_clickable(label, url):
-#     if not url:
-#         return ""
-#     return f"[{label}]({url})"
 
 def generate_presigned_url(s3_uri):
     if not isinstance(s3_uri, str):

@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-
 def render_filters(df):
     """
     Renders filters for session date range, minimum duration, and subject selection.
