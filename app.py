@@ -31,7 +31,6 @@ st.title("Sleep Data Dashboard")
 st.caption(
     f"Last updated: {df['Date'].max() if len(df) else 'N/A'}"
 )
-print("duration:", df[df["Date"] == df["Date"].max()][["Subject_ID", "Session_ID", "Duration (min)"]])
 
 # -----------------------------
 # Filter
@@ -188,13 +187,31 @@ if st.session_state.get("show_spo2_gallery", False):
 
                 plot_url = row["SpO2 Snapshot"] if row["SpO2 Snapshot"] else None
 
-                if plot_url:
-                    st.image(
-                        plot_url,
-                        use_container_width=True
+                # if plot_url:
+                #     st.image(
+                #         plot_url,
+                #         use_container_width=True
+                #     )
+                # else:
+                #     st.caption("No plot")
+
+                pdf_url = row["PDF Report"]
+                plot_url = row["SpO2 Snapshot"]
+
+                if plot_url and pdf_url:
+                    st.markdown(
+                        f"""
+                        <a href="{pdf_url}" target="_blank">
+                            <img src="{plot_url}" style="width:100%; border-radius:6px;" />
+                        </a>
+                        """,
+                        unsafe_allow_html=True
                     )
+                elif plot_url:
+                    st.image(plot_url, use_container_width=True)
                 else:
                     st.caption("No plot")
+
 
 # st.divider()
 # st.subheader("Enlarge SpO₂ Plot")
