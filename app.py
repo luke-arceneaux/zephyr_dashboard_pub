@@ -205,7 +205,8 @@ if st.session_state.get("show_spo2_gallery", False):
                             <img src="{plot_url}" style="width:100%; border-radius:6px;" />
                         </a>
                         """,
-                        unsafe_allow_html=True
+                        unsafe_allow_html=True,
+                        style="width:100%; border-radius:6px; cursor:pointer;"
                     )
                 elif plot_url:
                     st.image(plot_url, use_container_width=True)
