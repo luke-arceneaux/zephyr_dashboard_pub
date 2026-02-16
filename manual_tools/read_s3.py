@@ -43,8 +43,8 @@ def interpolate_spo2(spo2_raw, interp_window=30):
 
 def generate_file_field_paths(subject, session, snapshot_status):
     s3_front = "s3://zephyrapptestbucket/"
-    report_path = f"reports/zephyr/stereo/subj{subject}/sess{session}/"
-    snapshot_path = f"snapshots/zephyr/stereo/subj{subject}/sess{session}/"
+    report_path = f"reports/zephyr/stereo/"
+    snapshot_path = f"snapshots/zephyr/stereo/"
     filename = f"zephyr_stereo_subj{subject}_sess{session}"
     report_files = {
         "PDF Report": f"{s3_front}{report_path}{filename}.pdf",
@@ -186,6 +186,10 @@ def generate_metrics(s3, subject, session):
     """
     Orchestrate metric generation for single subject, session pair
     """
+    admin = generate_admin_fields(subject, session)
+    if admin["Date"] <= date(2025, 11, 20):
+        return {**admin, "Duration (s)": 0}
+    
     filename = f"zephyr_stereo_subj{subject}_sess{session}"
     # raw paths
     spo2_raw_path = f"zephyr/oxygen/{filename.replace('stereo', 'oxygen')}.csv"
@@ -346,7 +350,9 @@ def generate_metrics(s3, subject, session):
         "Desat Count (sub 90%)": desat_count_90,
         "Hypoxic Burden (4%)": hypox_burden,
     }
+    
     row = {
+        **admin,
         **base_metrics, 
         **spo2_metrics, 
         **position_distribution,
@@ -416,19 +422,42 @@ if __name__ == "__main__":
     # with open("ids.json", "w") as file:
     #     json.dump(ids, file, indent=4)
 
-    generated = pd.read_csv("zephyr_stereo_metadata_0.csv")
-    print(generated.head())
-    print(generated.index)
+    generated_id = pd.read_csv("zephyr_stereo_metadata_int_m.csv", dtype={"Subject_ID": str, "Session_ID": str})
+    generated = pd.read_csv("zephyr_stereo_metadata.csv", dtype={"Subject_ID": str, "Session_ID": str})
 
     metadata_rows = []
+    
     i = 0
     for subject, session in ids[i:]:
         print(f"Subject: {subject}, Session: {session}")
-        gen_row = generated.iloc[i]
-        duration = gen_row["Duration (s)"]
+
+        if (str(subject), str(session)) not in zip(generated_id["Subject_ID"], generated_id["Session_ID"]):
+            continue
+        else:
+            print("running")
+
+        generated_row = generated[
+            (generated["Subject_ID"] == str(subject)) & 
+            (generated["Session_ID"] == str(session))
+        ]
+        # duration = generated_row["Duration (s)"].values[0]
+        # print("duration:", duration)
+        spo2_status = generated_row["SpO2 Snapshot"].values
+        # print("spo2_status:", spo2_status)
+        if len(spo2_status) > 0:
+            if spo2_status[0] != "Null":
+                spo2_status = "Pass"
+            else:
+                spo2_status = None
+        else:
+            spo2_status = None
 
         # row = generate_metrics(s3, subject, session)
-        row = generate_missing(s3, subject, session, duration=duration)
+        # row = generate_missing(s3, subject, session, duration=duration)
+        row = generate_file_field_paths(subject, session, spo2_status)
+        # if row["Duration (s)"] == 0:
+        #     continue
+
         print("Generated Row:", row)
         metadata_rows.append(row)
         i += 1
@@ -436,7 +465,7 @@ if __name__ == "__main__":
             print(f"Processed {i} subjects/sessions")
             # Save intermediate results
             intermediate_df = pd.DataFrame(metadata_rows)
-            intermediate_df.to_csv(f"zephyr_stereo_metadata_missing{i}.csv", index=False)
+            intermediate_df.to_csv(f"zephyr_stereo_metadata_int_{i}.csv", index=False)
 
     metadata_df = pd.DataFrame(metadata_rows)
-    metadata_df.to_csv("zephyr_stereo_metadata_missing_sessions.csv", index=False)
+    metadata_df.to_csv("zephyr_stereo_metadata_int_links.csv", index=False)

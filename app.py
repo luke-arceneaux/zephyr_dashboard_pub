@@ -31,6 +31,7 @@ st.title("Sleep Data Dashboard")
 st.caption(
     f"Last updated: {df['Date'].max() if len(df) else 'N/A'}"
 )
+print(df[df["Date"] == df["Date"].max()][["Subject_ID", "Session_ID", "Duration (min)"]])
 
 # -----------------------------
 # Filter

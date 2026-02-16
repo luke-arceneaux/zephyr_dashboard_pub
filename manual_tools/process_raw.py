@@ -78,8 +78,16 @@ def butterworth_filter(data, cutoff=1, order=4, pass_type="high"):
     return filtfilt(b, a, data)
 
 if __name__ == "__main__":
-    old = pd.read_csv("zephyr_stereo_metadata_0.csv")
-    new = pd.read_csv("zephyr_stereo_metadata_missing_sessions.csv", dtype={"Session_ID": str})
+    # old = pd.read_csv("zephyr_stereo_metadata_0.csv", dtype={"Session_ID": str})
+    # new = pd.read_csv("zephyr_stereo_metadata_int.csv", dtype={"Session_ID": str})
+    # new_id = pd.read_csv("zephyr_stereo_metadata_int_m.csv", dtype={"Session_ID": str})
 
-    old["Session_ID"] = new["Session_ID"].astype(str)
+    # new["Session_ID"] = new_id["Session_ID"].astype(str)
+    # file = pd.concat([old, new], ignore_index=True)
+
+    # file.to_csv("zephyr_stereo_metadata_fixed.csv", index=False)
+
+    old = pd.read_csv("zephyr_stereo_metadata.csv", dtype={"Session_ID": str})
+    old["Duration (min)"] = old["Duration (s)"] / 60
+    old.drop(columns=["Duration (s)"], inplace=True)
     old.to_csv("zephyr_stereo_metadata_fixed.csv", index=False)
