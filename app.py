@@ -46,8 +46,8 @@ filtered_df = df[
     (df["Duration (min)"] >= min_duration)
 ]
 
-if selected_subject != "All Subjects":
-    filtered_df = filtered_df[filtered_df["Subject_ID"] == selected_subject]
+if "All Subjects" not in selected_subject:
+    filtered_df = filtered_df[filtered_df["Subject_ID"].isin(selected_subject)]
 
 filtered_df = filtered_df.sort_values("Date", ascending=False) # sort by subject ID?
 
@@ -68,7 +68,7 @@ col1, col2, col3 = st.columns(3)
 
 col1.metric("Nights Recorded", len(filtered_df))
 
-if selected_subject == "All Subjects":
+if "All Subjects" in selected_subject:
     col2.metric("Unique Subjects", filtered_df["Subject_ID"].nunique())
 else:
     if not filtered_df.empty:

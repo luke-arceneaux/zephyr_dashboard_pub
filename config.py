@@ -17,11 +17,6 @@ DISPLAY_COLUMNS = [
     "T90_perc",
     "T90_min",
     "supine_proportion",
-    "prone_proportion",
-    "left_proportion",
-    "right_proportion",
-    "upright_proportion",
-    "non_supine_proportion",
     "PDF Report",
     "Interactive Report",
     "SpO2 Snapshot"

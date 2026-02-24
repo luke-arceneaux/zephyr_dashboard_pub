@@ -6,10 +6,18 @@ def render_filters(df):
     Renders filters for session date range, minimum duration, and subject selection.
     """
     # min_date = df["Date"].min()
-    min_date = pd.to_datetime("2025-01-01").date()  # Set to fixed date for consistency
+    min_date = pd.to_datetime("2026-01-01").date()  # Set to fixed date for consistency
     max_date = df["Date"].max()
 
-    subjects = ["All Subjects"] + sorted(df["Subject_ID"].unique().tolist())
+
+    ids_sorted = (
+        df.groupby('Subject_ID')['Date']
+        .max()                 # most recent date per ID
+        .sort_values(ascending=False)
+        .index
+        .tolist()
+    )
+    subjects = ["All Subjects"] + ids_sorted
 
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -45,7 +53,7 @@ def render_filters(df):
         )
     with col3:
         subjects = ["All Subjects"] + sorted(df["Subject_ID"].unique().tolist())
-        selected_subject = st.selectbox(
+        selected_subject = st.multiselect(
             "Select Subject",
             subjects
         )
