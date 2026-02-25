@@ -23,7 +23,6 @@ DISPLAY_COLUMNS = [
 ]
 GALLERY_SORT_OPTIONS = {
     "Most Recent": "SessionDateTime",
-    "Date": "Date",
     "Duration": "Duration (min)",
     "ODI": "ODI",
     "Hypoxic Burden (4%)": "Hypoxic Burden (4%)",
