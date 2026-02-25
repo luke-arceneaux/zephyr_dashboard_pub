@@ -21,7 +21,10 @@ df["Date"] = pd.to_datetime(
     format="mixed"
 ).dt.date
 df["Start Time"] = pd.to_datetime(df["Start Time"], format="%H:%M:%S").dt.time
-
+df["SessionDateTime"] = pd.to_datetime(
+    df["Date"].astype(str) + " " + df["Start Time"].astype(str),
+    errors="coerce"
+)
 # -----------------------------
 # Header
 # -----------------------------
@@ -49,10 +52,6 @@ filtered_df = df[
 if "All Subjects" not in selected_subject:
     filtered_df = filtered_df[filtered_df["Subject_ID"].isin(selected_subject)]
 
-df["SessionDateTime"] = pd.to_datetime(
-    df["Date"].astype(str) + " " + df["Start Time"].astype(str),
-    errors="coerce"
-)
 filtered_df = filtered_df.sort_values("SessionDateTime", ascending=False) # sort by subject ID?
 
 filtered_df = add_presigned_links(filtered_df)
