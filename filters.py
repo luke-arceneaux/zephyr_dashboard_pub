@@ -9,11 +9,10 @@ def render_filters(df):
     min_date = pd.to_datetime("2026-01-01").date()  # Set to fixed date for consistency
     max_date = df["Date"].max()
 
-
     ids_sorted = (
         df.groupby('Subject_ID')['Date']
         .max()                 # most recent date per ID
-        .sort_values(ascending=True)
+        .sort_values(ascending=False)
         .index
         .tolist()
     )
