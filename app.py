@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from filters import render_filters
 from file_helpers import load_metadata, add_presigned_links
-from config import DISPLAY_COLUMNS
+from config import DISPLAY_COLUMNS, GALLERY_SORT_OPTIONS
 
 st.set_page_config(
     page_title="Sleep Data Dashboard",
@@ -145,6 +145,17 @@ with col1:
         "Clicking thumbnails opens",
         ["Interactive HTML", "PDF Report"],
         default="Interactive HTML"
+    )
+
+    sort_label = st.selectbox(
+        "Sort gallery by",
+        options=list(GALLERY_SORT_OPTIONS.keys()),
+        index=0
+    )
+
+    sort_desc = st.toggle(
+        "Descending (highest / newest first)",
+        value=True
     )
 
     generate_gallery = st.button(

@@ -21,3 +21,11 @@ DISPLAY_COLUMNS = [
     "Interactive Report",
     "SpO2 Snapshot"
 ]
+GALLERY_SORT_OPTIONS = {
+    "Most Recent": "SessionDateTime",
+    "Date": "Date",
+    "Duration": "Duration (min)",
+    "ODI": "ODI",
+    "Hypoxic Burden (4%)": "Hypoxic Burden (4%)",
+    "T90 (%)": "T90_perc",
+}
