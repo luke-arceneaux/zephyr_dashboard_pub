@@ -186,10 +186,26 @@ if st.session_state.get("show_spo2_gallery", False):
             col = cols[idx % NUM_COLS]
 
             with col:
-                st.markdown(
-                    f"**Subject: {row['Subject_ID']}**<br>{row['Date']}",
-                    unsafe_allow_html=True
-                )
+                # st.markdown(
+                #     f"**Subject: {row['Subject_ID']}**<br>{row['Date']}",
+                #     unsafe_allow_html=True
+                # )
+                with col:
+                    st.markdown(
+                        f"""
+                        <div style="margin-bottom:4px;">
+                            <b>Subject:</b> {row['Subject_ID']}<br>
+                            <b>Date:</b> {row['Date']}
+                        </div>
+                        <div style="font-size:0.85rem; line-height:1.4;">
+                            Duration: {row['Duration (min)']:.1f} min<br>
+                            ODI: {row['ODI']:.2f}<br>
+                            Hypoxic Burden: {row['Hypoxic Burden (4%)']:.2f}<br>
+                            T90%: {row['T90_perc']:.2f}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
                 pdf_url = row["PDF Report"]
                 html_url = row["Interactive Report"]
