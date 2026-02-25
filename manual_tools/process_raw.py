@@ -87,7 +87,6 @@ if __name__ == "__main__":
 
     # file.to_csv("zephyr_stereo_metadata_fixed.csv", index=False)
 
-    old = pd.read_csv("zephyr_stereo_metadata.csv", dtype={"Session_ID": str})
-    old["Duration (min)"] = old["Duration (s)"] / 60
-    old.drop(columns=["Duration (s)"], inplace=True)
-    old.to_csv("zephyr_stereo_metadata_fixed.csv", index=False)
+    old = pd.read_csv("../session_metadata.csv", dtype={"Session_ID": str})
+    old['version'] = 1.0
+    old.to_csv("../session_metadata_v1.csv", index=False)
