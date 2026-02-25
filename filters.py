@@ -13,7 +13,7 @@ def render_filters(df):
     ids_sorted = (
         df.groupby('Subject_ID')['Date']
         .max()                 # most recent date per ID
-        .sort_values(ascending=False)
+        .sort_values(ascending=True)
         .index
         .tolist()
     )
