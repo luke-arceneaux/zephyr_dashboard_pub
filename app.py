@@ -178,18 +178,37 @@ if filter_hash != st.session_state.last_filter_hash:
 
 # Display gallery if flag is set
 if st.session_state.get("show_spo2_gallery", False):
+    sort_col = GALLERY_SORT_OPTIONS[sort_label]
 
     gallery_df = filtered_df[
         filtered_df["SpO2 Snapshot"].notna() &
         (filtered_df["SpO2 Snapshot"] != "")
-    ].head(max_plots)
+    ].sort_values(
+        by=sort_col,
+        ascending=not sort_desc,
+        na_position="last"
+    ).head(max_plots)
+
+    filter_hash = (
+        start_date,
+        end_date,
+        min_duration,
+        tuple(selected_subject),
+        sort_label,
+        sort_desc
+    )
 
     if gallery_df.empty:
         st.warning("No SpO₂ plots available for the current filters.")
     else:
+        # st.caption(
+        #     f"Displaying {len(gallery_df)} SpO₂ plots "
+        #     f"(filtered, capped at {max_plots})"
+        # )
         st.caption(
-            f"Displaying {len(gallery_df)} SpO₂ plots "
-            f"(filtered, capped at {max_plots})"
+            f"Displaying {len(gallery_df)} SpO₂ plots • "
+            f"Sorted by {sort_label} "
+            f"({'desc' if sort_desc else 'asc'})"
         )
 
         # ---- Thumbnail grid ----
