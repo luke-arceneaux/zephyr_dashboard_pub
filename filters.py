@@ -51,7 +51,6 @@ def render_filters(df):
             step=5
         )
     with col3:
-        subjects = ["All Subjects"] + sorted(df["Subject_ID"].unique().tolist())
         selected_subject = st.multiselect(
             "Select Subject",
             subjects, 
