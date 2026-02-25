@@ -49,7 +49,11 @@ filtered_df = df[
 if "All Subjects" not in selected_subject:
     filtered_df = filtered_df[filtered_df["Subject_ID"].isin(selected_subject)]
 
-filtered_df = filtered_df.sort_values("Date", ascending=False) # sort by subject ID?
+df["SessionDateTime"] = pd.to_datetime(
+    df["Date"].astype(str) + " " + df["Start Time"].astype(str),
+    errors="coerce"
+)
+filtered_df = filtered_df.sort_values("SessionDateTime", ascending=False) # sort by subject ID?
 
 filtered_df = add_presigned_links(filtered_df)
 
@@ -283,10 +287,10 @@ st.divider()
 st.subheader("Trends")
 
 # df["DateTime"] = pd.to_datetime(df["Date"] + " " + df["Start Time"])
-trend_df = filtered_df.sort_values("Date")
+trend_df = filtered_df.sort_values("SessionDateTime").copy()
 
 st.line_chart(
     trend_df,
-    x="Date",
+    x="SessionDateTime",
     y=["ODI", "Hypoxic Burden (4%)"]
 )

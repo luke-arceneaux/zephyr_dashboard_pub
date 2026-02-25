@@ -55,7 +55,8 @@ def render_filters(df):
         subjects = ["All Subjects"] + sorted(df["Subject_ID"].unique().tolist())
         selected_subject = st.multiselect(
             "Select Subject",
-            subjects
+            subjects, 
+            default=["All Subjects"]
         )
 
     return start_date, end_date, min_duration, selected_subject
