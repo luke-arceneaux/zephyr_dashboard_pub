@@ -195,13 +195,11 @@ if st.session_state.get("show_spo2_gallery", False):
                         f"""
                         <div style="margin-bottom:4px;">
                             <b>Subject:</b> {row['Subject_ID']}<br>
-                            <b>Date:</b> {row['Date']}
+                            <b>Date:</b> {row['Date']} | <b>Start:</b> {row['Start Time']}
                         </div>
                         <div style="font-size:0.85rem; line-height:1.4;">
-                            Duration: {row['Duration (min)']:.1f} min<br>
-                            ODI: {row['ODI']:.2f}<br>
-                            Hypoxic Burden: {row['Hypoxic Burden (4%)']:.2f}<br>
-                            T90%: {row['T90_perc']:.2f}
+                            Duration: {row['Duration (min)']/60:.1f} hrs<br>
+                            ODI: {row['ODI']:.2f} | Hypoxic Burden: {row['Hypoxic Burden (4%)']:.2f} | T90%: {row['T90_perc']:.2f}%
                         </div>
                         """,
                         unsafe_allow_html=True
