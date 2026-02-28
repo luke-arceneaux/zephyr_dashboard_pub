@@ -5,8 +5,8 @@ def render_filters(df):
     """
     Renders filters for session date range, minimum duration, and subject selection.
     """
-    # min_date = df["Date"].min()
-    min_date = pd.to_datetime("2026-01-01").date()  # Set to fixed date for consistency
+    min_date_in_data = df["Date"].min()
+    default_min_date = pd.to_datetime("2026-01-01").date()
     max_date = df["Date"].max()
 
     ids_sorted = (
@@ -22,8 +22,8 @@ def render_filters(df):
     with col1:
         date_range = st.date_input(
             "Session Date Range",
-            value=(min_date, max_date),
-            min_value=min_date,
+            value=(default_min_date, max_date),
+            min_value=min_date_in_data,
             max_value=max_date
         )
         # Handle single-date edge case
@@ -38,7 +38,7 @@ def render_filters(df):
             elif len(date_range) == 1:
                 start_date = end_date = date_range[0]
             else:
-                start_date = end_date = min_date
+                start_date = end_date = min_date_in_data
         else:
             start_date = end_date = date_range
 
