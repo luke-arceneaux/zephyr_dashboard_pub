@@ -239,12 +239,13 @@ if st.session_state.get("show_spo2_gallery", False):
                     # )
                     device_id = row.get("Device_ID", "")
                     device_str = "" if (device_id is None or str(device_id).strip().lower() == "nan") else str(device_id).strip()
+
                     st.markdown(
                         f"""
                         <div style="margin-bottom:4px;">
                             <b>Subject:</b> {row['Subject_ID']}<br>
-                            <b>Date:</b> {row['Date']} | <b>Start:</b> {row['Start Time']}
-                            {f'<br><b>Device:</b> {device_str}' if device_str else ''}
+                            <b>Date:</b> {row['Date']} | <b>Start:</b> {row['Start Time']}<br>
+                            <b>Device:</b> {device_str if device_str else '<span style="color:#aaa;">—</span>'}
                         </div>
                         <div style="font-size:0.85rem; line-height:1.4;">
                             Duration: {row['Duration (min)']/60:.1f} hrs<br>
