@@ -237,7 +237,7 @@ if st.session_state.get("show_spo2_gallery", False):
                     #     """,
                     #     unsafe_allow_html=True
                     # )
-                    device_id = row.get("Device ID", "")
+                    device_id = row.get("Device_ID", "")
                     device_str = "" if (device_id is None or str(device_id).strip().lower() == "nan") else str(device_id).strip()
                     st.markdown(
                         f"""
