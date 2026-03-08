@@ -223,6 +223,7 @@ if st.session_state.get("show_spo2_gallery", False):
                 #     f"**Subject: {row['Subject_ID']}**<br>{row['Date']}",
                 #     unsafe_allow_html=True
                 # )
+                with col:
                     # st.markdown(
                     #     f"""
                     #     <div style="margin-bottom:4px;">
@@ -236,66 +237,90 @@ if st.session_state.get("show_spo2_gallery", False):
                     #     """,
                     #     unsafe_allow_html=True
                     # )
-                st.markdown(
-                    f"""
-                    <div style="margin-bottom:4px;">
-                        <b>Subject:</b> {row['Subject_ID']}<br>
-                        <b>Date:</b> {row['Date']} | <b>Start:</b> {row['Start Time']}
-                        {f'<br><b>Device:</b> {str(row["Device ID"]).strip()}' if str(row.get("Device ID", "")).strip() else ''}
-                    </div>
-                    <div style="font-size:0.85rem; line-height:1.4;">
-                        Duration: {row['Duration (min)']/60:.1f} hrs<br>
-                        ODI: {row['ODI']:.2f} | Hypoxic Burden: {row['Hypoxic Burden (4%)']:.2f} | T90%: {row['T90_perc']:.2f}%
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+                    st.markdown(
+                        f"""
+                        <div style="margin-bottom:4px;">
+                            <b>Subject:</b> {row['Subject_ID']}<br>
+                            <b>Date:</b> {row['Date']} | <b>Start:</b> {row['Start Time']}
+                            {f'<br><b>Device:</b> {str(row["Device ID"]).strip()}' if str(row.get("Device ID", "")).strip() else ''}
+                        </div>
+                        <div style="font-size:0.85rem; line-height:1.4;">
+                            Duration: {row['Duration (min)']/60:.1f} hrs<br>
+                            ODI: {row['ODI']:.2f} | Hypoxic Burden: {row['Hypoxic Burden (4%)']:.2f} | T90%: {row['T90_perc']:.2f}%
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
-            pdf_url = row["PDF Report"]
-            html_url = row["Interactive Report"]
-            plot_url = row["SpO2 Snapshot"] if row["SpO2 Snapshot"] else None
+                pdf_url = row["PDF Report"]
+                html_url = row["Interactive Report"]
+                plot_url = row["SpO2 Snapshot"] if row["SpO2 Snapshot"] else None
 
-            if link_target == "Interactive HTML":
-                print("Link target: Interactive HTML")
-                target_url = html_url if html_url else pdf_url
-            elif link_target == "PDF Report":
-                print("Link target: PDF Report")
-                target_url = pdf_url if pdf_url else html_url
-            else:
-                target_url = None
+                if link_target == "Interactive HTML":
+                    print("Link target: Interactive HTML")
+                    target_url = html_url if html_url else pdf_url
+                elif link_target == "PDF Report":
+                    print("Link target: PDF Report")
+                    target_url = pdf_url if pdf_url else html_url
+                else:
+                    target_url = None
 
-            if plot_url and target_url:
-                # st.markdown(
-                #     f"""
-                #     <a href="{pdf_url}" target="_blank">
-                #         <img src="{plot_url}" style="width:100%; border-radius:6px;" />
-                #     </a>
-                #     """,
-                #     unsafe_allow_html=True,
-                # )
-                st.markdown(
-                    f"""
-                    <style>
-                    .spo2-thumb {{
-                        border-radius:8px;
-                        cursor:pointer;
-                        transition: transform 0.15s ease-in-out;
-                    }}
-                    .spo2-thumb:hover {{
-                        transform: scale(1.02);
-                    }}
-                    </style>
+                if plot_url and target_url:
+                    # st.markdown(
+                    #     f"""
+                    #     <a href="{pdf_url}" target="_blank">
+                    #         <img src="{plot_url}" style="width:100%; border-radius:6px;" />
+                    #     </a>
+                    #     """,
+                    #     unsafe_allow_html=True,
+                    # )
+                    st.markdown(
+                        f"""
+                        <style>
+                        .spo2-thumb {{
+                            border-radius:8px;
+                            cursor:pointer;
+                            transition: transform 0.15s ease-in-out;
+                        }}
+                        .spo2-thumb:hover {{
+                            transform: scale(1.02);
+                        }}
+                        </style>
 
-                    <a href="{target_url}" target="_blank" style="text-decoration:none;">
-                        <img src="{plot_url}" class="spo2-thumb" style="width:100%;" />
-                    </a>
-                    """,
-                    unsafe_allow_html=True
-                )
-            elif plot_url:
-                st.image(plot_url, use_container_width=True)
-            else:
-                st.caption("No plot")
+                        <a href="{target_url}" target="_blank" style="text-decoration:none;">
+                            <img src="{plot_url}" class="spo2-thumb" style="width:100%;" />
+                        </a>
+                        """,
+                        unsafe_allow_html=True
+                    )
+                elif plot_url:
+                    st.image(plot_url, use_container_width=True)
+                else:
+                    st.caption("No plot")
+
+                
+
+
+# st.divider()
+# st.subheader("Enlarge SpO₂ Plot")
+
+# options = [
+#     f"{row.Subject_ID} – {row.Date}"
+#     for _, row in gallery_df.iterrows()
+# ]
+
+# selected = st.selectbox(
+#     "Select plot to enlarge",
+#     options,
+#     index=0
+# )
+
+# selected_row = gallery_df.iloc[options.index(selected)]
+
+# plot_url = generate_presigned_url(selected_row["SpO2 Snapshot"])
+# st.image(plot_url, use_container_width=True)
+
+
 
 # -----------------------------
 # Trend Plots
