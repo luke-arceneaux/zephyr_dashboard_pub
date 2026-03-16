@@ -20,7 +20,7 @@ DISPLAY_COLUMNS = [
     "supine_proportion",
     "PDF Report",
     "Interactive Report",
-    "SpO2 Snapshot"
+    # "SpO2 Snapshot"
 ]
 GALLERY_SORT_OPTIONS = {
     "Most Recent": "SessionDateTime",
