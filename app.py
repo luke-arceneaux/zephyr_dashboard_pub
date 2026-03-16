@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import sqlite3
+import os
 from filters import render_filters
 from file_helpers import load_metadata, add_presigned_links
 from config import DISPLAY_COLUMNS, GALLERY_SORT_OPTIONS
@@ -8,6 +10,49 @@ st.set_page_config(
     page_title="Sleep Data Dashboard",
     layout="wide"
 )
+
+# -----------------------------
+# Notes DB Setup
+# -----------------------------
+
+NOTES_DB_PATH = "session_notes.db"
+
+def init_notes_db():
+    conn = sqlite3.connect(NOTES_DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS notes (
+            Subject_ID TEXT,
+            Session_ID TEXT,
+            Note TEXT,
+            PRIMARY KEY (Subject_ID, Session_ID)
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def get_note(subject_id, session_id):
+    conn = sqlite3.connect(NOTES_DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "SELECT Note FROM notes WHERE Subject_ID=? AND Session_ID=?",
+        (subject_id, session_id)
+    )
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else ""
+
+def save_note(subject_id, session_id, note):
+    conn = sqlite3.connect(NOTES_DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "INSERT OR REPLACE INTO notes (Subject_ID, Session_ID, Note) VALUES (?, ?, ?)",
+        (subject_id, session_id, note)
+    )
+    conn.commit()
+    conn.close()
+
+init_notes_db()
 
 # -----------------------------
 # Load Data
@@ -99,9 +144,16 @@ st.divider()
 # Session Table
 # -----------------------------
 
+st.subheader("Nights of Sleep")
+
+show_notes = st.toggle("Show Notes Column", value=False)
+
 table_df = filtered_df[DISPLAY_COLUMNS].round(2).reset_index(drop=True)
 
-st.subheader("Nights of Sleep")
+if show_notes:
+    def fetch_note(row):
+        return get_note(row["Subject_ID"], row["Session_ID"])
+    table_df["Note"] = table_df.apply(fetch_note, axis=1)
 
 st.dataframe(
     table_df,
@@ -122,6 +174,32 @@ st.dataframe(
     },
     key="sleep_table"
 )
+
+# -----------------------------
+# Row Note Editor
+# -----------------------------
+
+st.divider()
+st.subheader("Write/View Notes for a Session")
+
+session_options = [
+    f"{row.Subject_ID} | {row.Session_ID} | {row.Date}"
+    for _, row in table_df.iterrows()
+]
+if session_options:
+    selected = st.selectbox("Select session to write/view note", session_options)
+    sel_idx = session_options.index(selected)
+    sel_row = table_df.iloc[sel_idx]
+    subj_id = sel_row["Subject_ID"]
+    sess_id = sel_row["Session_ID"]
+
+    existing_note = get_note(subj_id, sess_id)
+    note = st.text_area("Note", value=existing_note, height=100)
+    if st.button("Save Note"):
+        save_note(subj_id, sess_id, note)
+        st.success("Note saved!")
+else:
+    st.info("No sessions available to annotate.")
 
 # -----------------------------
 # SpO₂ Plot Gallery
