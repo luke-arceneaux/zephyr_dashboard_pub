@@ -70,6 +70,7 @@ df["SessionDateTime"] = pd.to_datetime(
     df["Date"].astype(str) + " " + df["Start Time"].astype(str),
     errors="coerce"
 )
+df["HypBurIndex(4%)"] = df["Hypoxic Burden (4%)"]/(df["Duration (min)"]*60)
 # -----------------------------
 # Header
 # -----------------------------
@@ -146,7 +147,7 @@ st.divider()
 
 st.subheader("Nights of Sleep")
 
-show_notes = st.toggle("Show Notes Column", value=False)
+show_notes = st.toggle("Show Notes", value=False)
 
 table_df = filtered_df[DISPLAY_COLUMNS].round(2).reset_index(drop=True)
 
@@ -180,14 +181,14 @@ st.dataframe(
 # -----------------------------
 
 st.divider()
-st.subheader("Write/View Notes for a Session")
+st.subheader("Write/View Session Notes")
 
 session_options = [
     f"{row.Subject_ID} | {row.Session_ID} | {row.Date}"
     for _, row in table_df.iterrows()
 ]
 if session_options:
-    selected = st.selectbox("Select session to write/view note", session_options)
+    selected = st.selectbox("Select session", session_options)
     sel_idx = session_options.index(selected)
     sel_row = table_df.iloc[sel_idx]
     subj_id = sel_row["Subject_ID"]
@@ -197,7 +198,7 @@ if session_options:
     note = st.text_area("Note", value=existing_note, height=100)
     if st.button("Save Note"):
         save_note(subj_id, sess_id, note)
-        st.success("Note saved!")
+        st.success("Note saved")
 else:
     st.info("No sessions available to annotate.")
 

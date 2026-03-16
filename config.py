@@ -12,7 +12,8 @@ DISPLAY_COLUMNS = [
     "Desat Count (3%)",
     "Desat Count (4%)",
     "Desat Count (sub 90%)",
-    "Hypoxic Burden (4%)",
+    "HypBurIndex(4%)",
+    # "Hypoxic Burden (4%)",
     "Min SpO2",
     "T90_perc",
     "T90_min",
@@ -25,6 +26,6 @@ GALLERY_SORT_OPTIONS = {
     "Most Recent": "SessionDateTime",
     "Duration": "Duration (min)",
     "ODI": "ODI",
-    "Hypoxic Burden (4%)": "Hypoxic Burden (4%)",
+    "Hypoxic Burden (4%)": "HypBurIndex(4%)",
     "T90 (%)": "T90_perc",
 }
