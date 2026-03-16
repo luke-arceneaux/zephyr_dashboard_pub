@@ -70,7 +70,7 @@ df["SessionDateTime"] = pd.to_datetime(
     df["Date"].astype(str) + " " + df["Start Time"].astype(str),
     errors="coerce"
 )
-df["HypBurIndex(4%)"] = df["Hypoxic Burden (4%)"]/(df["Duration (min)"]*60)
+df["HypBurIndex(4%)"] = df["Hypoxic Burden (4%)"]/(df["Duration (min)"]/60)
 # -----------------------------
 # Header
 # -----------------------------
