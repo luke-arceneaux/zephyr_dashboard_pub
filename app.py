@@ -184,7 +184,7 @@ st.divider()
 st.subheader("Write/View Session Notes")
 
 session_options = [
-    f"{row.Subject_ID} | {row.Session_ID} | {row.Date}"
+    f"Subject {row.Subject_ID} | Session {row.Session_ID} | {row.Date}"
     for _, row in table_df.iterrows()
 ]
 if session_options:
