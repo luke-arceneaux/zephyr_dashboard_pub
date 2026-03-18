@@ -209,32 +209,36 @@ show_archived = st.toggle("Show archived data", value=False)
 if not show_archived:
     table_df = table_df[~table_df["Archived"]]
 
-if show_notes:
-    def fetch_note(row):
-        return get_note(row["Subject_ID"], row["Session_ID"])
-    table_df["Note"] = table_df.apply(fetch_note, axis=1)
+# Set up column config based on show_archived
+column_config = {
+    "PDF Report": st.column_config.LinkColumn(
+        "PDF Report", 
+        display_text="PDF"
+    ),
+    "Interactive Report": st.column_config.LinkColumn(
+        "Interactive Report", 
+        display_text="HTML"
+    ),
+    "SpO2 Snapshot": st.column_config.LinkColumn(
+        "SpO2 Snapshot", 
+        display_text="View"
+    )
+}
+if show_archived:
+    column_config["Archived"] = st.column_config.CheckboxColumn("Archived", disabled=True)
+    column_config["Archive Reason"] = st.column_config.TextColumn("Archive Reason", disabled=True)
 
 st.dataframe(
     table_df,
     use_container_width=True,
-    column_config={
-        "PDF Report": st.column_config.LinkColumn(
-            "PDF Report", 
-            display_text="PDF"
-        ),
-        "Interactive Report": st.column_config.LinkColumn(
-            "Interactive Report", 
-            display_text="HTML"
-        ),
-        "SpO2 Snapshot": st.column_config.LinkColumn(
-            "SpO2 Snapshot", 
-            display_text="View"
-        ),
-        "Archived": st.column_config.CheckboxColumn("Archived", disabled=True),
-        "Archive Reason": st.column_config.TextColumn("Archive Reason", disabled=True)
-    },
+    column_config=column_config,
     key="sleep_table"
 )
+
+if show_notes:
+    def fetch_note(row):
+        return get_note(row["Subject_ID"], row["Session_ID"])
+    table_df["Note"] = table_df.apply(fetch_note, axis=1)
 
 # -----------------------------
 # Row Note Editor
@@ -289,7 +293,7 @@ if session_options:
             if reason.strip():
                 set_archive(subj_id, sess_id, reason, archived=True)
                 st.success("Session archived.")
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.warning("Please provide a reason to archive.")
     else:
@@ -297,7 +301,7 @@ if session_options:
         if st.button("Unarchive Session"):
             set_archive(subj_id, sess_id, reason=None, archived=False)
             st.success("Session unarchived.")
-            st.experimental_rerun()
+            st.rerun()
 else:
     st.info("No sessions available to archive/unarchive.")
 
