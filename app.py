@@ -208,7 +208,6 @@ table_df["Archive Reason"] = table_df.apply(lambda row: archive_status.get((row[
 show_archived = st.toggle("Show archived data", value=False)
 if not show_archived:
     table_df = table_df[~table_df["Archived"]]
-    table_df = table_df.drop(columns=["Archived", "Archive Reason"])
 
 if show_notes:
     def fetch_note(row):
@@ -220,81 +219,24 @@ column_config = {
     "Interactive Report": st.column_config.LinkColumn("Interactive Report", display_text="HTML"),
     "SpO2 Snapshot": st.column_config.LinkColumn("SpO2 Snapshot", display_text="View"),
 }
+
+display_df = table_df.copy()
 if show_archived:
     column_config["Archived"] = st.column_config.CheckboxColumn("Archived", disabled=True)
     column_config["Archive Reason"] = st.column_config.TextColumn("Archive Reason", disabled=True)
+else:
+    display_df = display_df.drop(columns=["Archived", "Archive Reason"])
 
 st.dataframe(
-    table_df,
+    display_df,
     use_container_width=True,
     column_config=column_config,
     key="sleep_table"
 )
 
 # -----------------------------
-# Row Note Editor
+# Editor
 # -----------------------------
-
-# st.divider()
-# st.subheader("Write/View Session Notes")
-
-# session_options = [
-#     f"Subject {row.Subject_ID} | Session {row.Session_ID} | {row.Date}"
-#     for _, row in table_df.iterrows()
-# ]
-# if session_options:
-#     selected = st.selectbox("Select session", session_options)
-#     sel_idx = session_options.index(selected)
-#     sel_row = table_df.iloc[sel_idx]
-#     subj_id = sel_row["Subject_ID"]
-#     sess_id = sel_row["Session_ID"]
-
-#     existing_note = get_note(subj_id, sess_id)
-#     note = st.text_area("Note", value=existing_note, height=100)
-#     if st.button("Save Note"):
-#         save_note(subj_id, sess_id, note)
-#         st.success("Note saved")
-# else:
-#     st.info("No sessions available to annotate.")
-
-# # -----------------------------
-# # Row Archive/Unarchive Editor
-# # -----------------------------
-
-# st.divider()
-# st.subheader("Archive/Unarchive Session")
-
-# session_options = [
-#     f"Subject {row.Subject_ID} | Session {row.Session_ID} | {row.Date}"
-#     for _, row in table_df.iterrows()
-# ]
-# if session_options:
-#     selected = st.selectbox("Select session to archive/unarchive", session_options)
-#     sel_idx = session_options.index(selected)
-#     sel_row = table_df.iloc[sel_idx]
-#     subj_id = sel_row["Subject_ID"]
-#     sess_id = sel_row["Session_ID"]
-#     is_archived = sel_row["Archived"]
-#     archive_reason = sel_row["Archive Reason"]
-
-#     if not is_archived:
-#         st.info("This session is not archived.")
-#         reason = st.text_area("Reason for archiving", value="", height=60)
-#         if st.button("Archive Session"):
-#             if reason.strip():
-#                 set_archive(subj_id, sess_id, reason, archived=True)
-#                 st.success("Session archived.")
-#                 st.rerun()
-#             else:
-#                 st.warning("Please provide a reason to archive.")
-#     else:
-#         st.info(f"This session is archived. Reason: {archive_reason}")
-#         if st.button("Unarchive Session"):
-#             set_archive(subj_id, sess_id, reason=None, archived=False)
-#             st.success("Session unarchived.")
-#             st.rerun()
-# else:
-#     st.info("No sessions available to archive/unarchive.")
 
 st.divider()
 
