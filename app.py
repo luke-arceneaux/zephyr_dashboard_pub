@@ -55,6 +55,55 @@ def save_note(subject_id, session_id, note):
 init_notes_db()
 
 # -----------------------------
+# Archive DB Setup
+# -----------------------------
+
+def init_archive_db():
+    conn = sqlite3.connect(NOTES_DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS archive (
+            Subject_ID TEXT,
+            Session_ID TEXT,
+            archived INTEGER DEFAULT 0,
+            archive_reason TEXT,
+            archived_at TEXT,
+            PRIMARY KEY (Subject_ID, Session_ID)
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def set_archive(subject_id, session_id, reason, archived=True):
+    import datetime
+    conn = sqlite3.connect(NOTES_DB_PATH)
+    c = conn.cursor()
+    if archived:
+        c.execute(
+            "INSERT OR REPLACE INTO archive (Subject_ID, Session_ID, archived, archive_reason, archived_at) VALUES (?, ?, 1, ?, ?)",
+            (subject_id, session_id, reason, datetime.datetime.now().isoformat())
+        )
+    else:
+        c.execute(
+            "INSERT OR REPLACE INTO archive (Subject_ID, Session_ID, archived, archive_reason, archived_at) VALUES (?, ?, 0, NULL, NULL)",
+            (subject_id, session_id)
+        )
+    conn.commit()
+    conn.close()
+
+def get_archive_status():
+    conn = sqlite3.connect(NOTES_DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT Subject_ID, Session_ID, archived, archive_reason FROM archive")
+    rows = c.fetchall()
+    conn.close()
+    # Return as dict for fast lookup
+    return {(row[0], row[1]): {'archived': bool(row[2]), 'archive_reason': row[3]} for row in rows}
+
+init_notes_db()
+init_archive_db()
+
+# -----------------------------
 # Load Data
 # -----------------------------
 
@@ -149,7 +198,16 @@ st.subheader("Nights of Sleep")
 
 show_notes = st.toggle("Show Notes", value=False)
 
+# Merge archive status into table_df
+archive_status = get_archive_status()
 table_df = filtered_df[DISPLAY_COLUMNS].round(2).reset_index(drop=True)
+table_df["Archived"] = table_df.apply(lambda row: archive_status.get((row["Subject_ID"], row["Session_ID"]), {}).get("archived", False), axis=1)
+table_df["Archive Reason"] = table_df.apply(lambda row: archive_status.get((row["Subject_ID"], row["Session_ID"]), {}).get("archive_reason", ""), axis=1)
+
+# Show/hide archived rows toggle
+show_archived = st.toggle("Show archived data", value=False)
+if not show_archived:
+    table_df = table_df[~table_df["Archived"]]
 
 if show_notes:
     def fetch_note(row):
@@ -171,7 +229,9 @@ st.dataframe(
         "SpO2 Snapshot": st.column_config.LinkColumn(
             "SpO2 Snapshot", 
             display_text="View"
-        )
+        ),
+        "Archived": st.column_config.CheckboxColumn("Archived", disabled=True),
+        "Archive Reason": st.column_config.TextColumn("Archive Reason", disabled=True)
     },
     key="sleep_table"
 )
@@ -201,6 +261,45 @@ if session_options:
         st.success("Note saved")
 else:
     st.info("No sessions available to annotate.")
+
+# -----------------------------
+# Row Archive/Unarchive Editor
+# -----------------------------
+
+st.divider()
+st.subheader("Archive/Unarchive Session")
+
+session_options = [
+    f"Subject {row.Subject_ID} | Session {row.Session_ID} | {row.Date}"
+    for _, row in table_df.iterrows()
+]
+if session_options:
+    selected = st.selectbox("Select session to archive/unarchive", session_options)
+    sel_idx = session_options.index(selected)
+    sel_row = table_df.iloc[sel_idx]
+    subj_id = sel_row["Subject_ID"]
+    sess_id = sel_row["Session_ID"]
+    is_archived = sel_row["Archived"]
+    archive_reason = sel_row["Archive Reason"]
+
+    if not is_archived:
+        st.info("This session is not archived.")
+        reason = st.text_area("Reason for archiving", value="", height=60)
+        if st.button("Archive Session"):
+            if reason.strip():
+                set_archive(subj_id, sess_id, reason, archived=True)
+                st.success("Session archived.")
+                st.experimental_rerun()
+            else:
+                st.warning("Please provide a reason to archive.")
+    else:
+        st.info(f"This session is archived. Reason: {archive_reason}")
+        if st.button("Unarchive Session"):
+            set_archive(subj_id, sess_id, reason=None, archived=False)
+            st.success("Session unarchived.")
+            st.experimental_rerun()
+else:
+    st.info("No sessions available to archive/unarchive.")
 
 # -----------------------------
 # SpO₂ Plot Gallery
