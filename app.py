@@ -208,6 +208,7 @@ table_df["Archive Reason"] = table_df.apply(lambda row: archive_status.get((row[
 show_archived = st.toggle("Show archived data", value=False)
 if not show_archived:
     table_df = table_df[~table_df["Archived"]]
+    table_df = table_df.drop(columns=["Archived", "Archive Reason"])
 
 if show_notes:
     def fetch_note(row):
@@ -314,7 +315,7 @@ with st.expander("Session Notes & Archive", expanded=False):
         is_archived = sel_row["Archived"]
         archive_reason = sel_row["Archive Reason"]
 
-        tab_notes, tab_archive = st.tabs(["📝 Notes", "🗄️ Archive"])
+        tab_notes, tab_archive = st.tabs(["Notes", "Archive"])
 
         with tab_notes:
             existing_note = get_note(subj_id, sess_id)
