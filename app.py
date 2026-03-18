@@ -209,36 +209,32 @@ show_archived = st.toggle("Show archived data", value=False)
 if not show_archived:
     table_df = table_df[~table_df["Archived"]]
 
-# Set up column config based on show_archived
-column_config = {
-    "PDF Report": st.column_config.LinkColumn(
-        "PDF Report", 
-        display_text="PDF"
-    ),
-    "Interactive Report": st.column_config.LinkColumn(
-        "Interactive Report", 
-        display_text="HTML"
-    ),
-    "SpO2 Snapshot": st.column_config.LinkColumn(
-        "SpO2 Snapshot", 
-        display_text="View"
-    )
-}
-if show_archived:
-    column_config["Archived"] = st.column_config.CheckboxColumn("Archived", disabled=True)
-    column_config["Archive Reason"] = st.column_config.TextColumn("Archive Reason", disabled=True)
-
-st.dataframe(
-    table_df,
-    use_container_width=True,
-    column_config=column_config,
-    key="sleep_table"
-)
-
 if show_notes:
     def fetch_note(row):
         return get_note(row["Subject_ID"], row["Session_ID"])
     table_df["Note"] = table_df.apply(fetch_note, axis=1)
+
+st.dataframe(
+    table_df,
+    use_container_width=True,
+    column_config={
+        "PDF Report": st.column_config.LinkColumn(
+            "PDF Report", 
+            display_text="PDF"
+        ),
+        "Interactive Report": st.column_config.LinkColumn(
+            "Interactive Report", 
+            display_text="HTML"
+        ),
+        "SpO2 Snapshot": st.column_config.LinkColumn(
+            "SpO2 Snapshot", 
+            display_text="View"
+        ),
+        "Archived": st.column_config.CheckboxColumn("Archived", disabled=True),
+        "Archive Reason": st.column_config.TextColumn("Archive Reason", disabled=True)
+    },
+    key="sleep_table"
+)
 
 # -----------------------------
 # Row Note Editor
