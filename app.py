@@ -238,8 +238,6 @@ st.dataframe(
 # Editor
 # -----------------------------
 
-st.divider()
-
 with st.expander("Session Notes & Archive", expanded=False):
     session_options = [
         f"Subject {row.Subject_ID} | Session {row.Session_ID} | {row.Date}"
@@ -292,37 +290,73 @@ st.divider()
 st.subheader("SpO₂ Plot Comparison")
 
 # Plot selection
-col1, _ = st.columns([1, 4])
-with col1:
+# col1, _ = st.columns([1, 4])
+# with col1:
+#     max_plots = st.number_input(
+#         "Max plots to display",
+#         min_value=1,
+#         max_value=50,
+#         value=20,
+#         step=1
+#     )
+
+#     link_target = st.segmented_control(
+#         "Clicking thumbnails opens",
+#         ["Interactive HTML", "PDF Report"],
+#         default="Interactive HTML"
+#     )
+
+#     sort_label = st.selectbox(
+#         "Sort gallery by",
+#         options=list(GALLERY_SORT_OPTIONS.keys()),
+#         index=0
+#     )
+
+#     sort_desc = st.toggle(
+#         "Descending (highest / newest first)",
+#         value=True
+#     )
+
+#     generate_gallery = st.button(
+#         "Generate SpO₂ Thumbnail Gallery",
+#         type="primary"
+#     )
+
+col_max, col_target, col_sort, col_dir = st.columns(4)
+
+with col_max:
     max_plots = st.number_input(
-        "Max plots to display",
+        "Max plots",
         min_value=1,
         max_value=50,
         value=20,
         step=1
     )
 
+with col_target:
     link_target = st.segmented_control(
-        "Clicking thumbnails opens",
+        "Thumbnails open",
         ["Interactive HTML", "PDF Report"],
         default="Interactive HTML"
     )
 
+with col_sort:
     sort_label = st.selectbox(
-        "Sort gallery by",
+        "Sort by",
         options=list(GALLERY_SORT_OPTIONS.keys()),
         index=0
     )
 
+with col_dir:
     sort_desc = st.toggle(
-        "Descending (highest / newest first)",
+        "Descending",
         value=True
     )
 
-    generate_gallery = st.button(
-        "Generate SpO₂ Thumbnail Gallery",
-        type="primary"
-    )
+generate_gallery = st.button(
+    "Generate SpO₂ Thumbnail Gallery",
+    type="primary"
+)
 
 if generate_gallery:
     st.session_state["show_spo2_gallery"] = True
@@ -490,7 +524,6 @@ if st.session_state.get("show_spo2_gallery", False):
 # Trend Plots
 # -----------------------------
 
-st.divider()
 st.subheader("Trends")
 
 # df["DateTime"] = pd.to_datetime(df["Date"] + " " + df["Start Time"])
