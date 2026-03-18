@@ -290,73 +290,37 @@ st.divider()
 st.subheader("SpO₂ Plot Comparison")
 
 # Plot selection
-# col1, _ = st.columns([1, 4])
-# with col1:
-#     max_plots = st.number_input(
-#         "Max plots to display",
-#         min_value=1,
-#         max_value=50,
-#         value=20,
-#         step=1
-#     )
-
-#     link_target = st.segmented_control(
-#         "Clicking thumbnails opens",
-#         ["Interactive HTML", "PDF Report"],
-#         default="Interactive HTML"
-#     )
-
-#     sort_label = st.selectbox(
-#         "Sort gallery by",
-#         options=list(GALLERY_SORT_OPTIONS.keys()),
-#         index=0
-#     )
-
-#     sort_desc = st.toggle(
-#         "Descending (highest / newest first)",
-#         value=True
-#     )
-
-#     generate_gallery = st.button(
-#         "Generate SpO₂ Thumbnail Gallery",
-#         type="primary"
-#     )
-
-col_max, col_target, col_sort, col_dir = st.columns(4)
-
-with col_max:
+col1, _ = st.columns([1, 4])
+with col1:
     max_plots = st.number_input(
-        "Max plots",
+        "Max plots to display",
         min_value=1,
         max_value=50,
         value=20,
         step=1
     )
 
-with col_target:
     link_target = st.segmented_control(
-        "Thumbnails open",
+        "Clicking thumbnails opens",
         ["Interactive HTML", "PDF Report"],
         default="Interactive HTML"
     )
 
-with col_sort:
     sort_label = st.selectbox(
-        "Sort by",
+        "Sort gallery by",
         options=list(GALLERY_SORT_OPTIONS.keys()),
         index=0
     )
 
-with col_dir:
     sort_desc = st.toggle(
-        "Descending",
+        "Descending (highest / newest first)",
         value=True
     )
 
-generate_gallery = st.button(
-    "Generate SpO₂ Thumbnail Gallery",
-    type="primary"
-)
+    generate_gallery = st.button(
+        "Generate SpO₂ Thumbnail Gallery",
+        type="primary"
+    )
 
 if generate_gallery:
     st.session_state["show_spo2_gallery"] = True
