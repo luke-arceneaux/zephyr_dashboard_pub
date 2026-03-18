@@ -240,8 +240,8 @@ st.dataframe(
 
 with st.expander("Session Notes & Archive", expanded=False):
     session_options = [
-        f"Subject {row.Subject_ID} | Session {row.Session_ID} | {row.Date}"
-        for _, row in table_df.iterrows()
+        f"[{i}] Subject {row.Subject_ID} | Session {row.Session_ID} | {row.Date}"
+        for i, row in table_df.iterrows()
     ]
 
     if not session_options:
