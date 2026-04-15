@@ -2,7 +2,7 @@ import boto3
 from urllib.parse import urlparse 
 import pandas as pd
 import streamlit as st
-from config import PRESIGNED_EXPIRY, S3_BUCKET, S3_METADATA_KEY
+from config import PRESIGNED_EXPIRY #, S3_BUCKET, S3_METADATA_KEY
 
 # @st.cache_data(ttl=300)  # refresh every 5 minutes
 # def load_metadata():
