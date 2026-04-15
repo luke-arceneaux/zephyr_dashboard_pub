@@ -123,6 +123,7 @@ for src in selected_sources:
     meta = DATA_SOURCES[src]
     try:
         df_src = load_metadata(meta["bucket"], meta["metadata_key"])
+        print(f"Loaded {len(df_src)} records from {meta['label']}")
         metadata_dfs.append(df_src)
     except Exception as e:
         st.error(f"Failed to load metadata for {meta['label']}: {e}")
