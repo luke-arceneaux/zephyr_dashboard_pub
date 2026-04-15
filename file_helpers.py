@@ -4,21 +4,21 @@ import pandas as pd
 import streamlit as st
 from config import PRESIGNED_EXPIRY, S3_BUCKET, S3_METADATA_KEY
 
-@st.cache_data(ttl=300)  # refresh every 5 minutes
-def load_metadata():
-    dtype = {"Subject_ID": str, "Session_ID": str}
+# @st.cache_data(ttl=300)  # refresh every 5 minutes
+# def load_metadata():
+#     dtype = {"Subject_ID": str, "Session_ID": str}
 
-    s3 = boto3.client("s3")
+#     s3 = boto3.client("s3")
 
-    obj = s3.get_object(
-        Bucket=S3_BUCKET,
-        Key=S3_METADATA_KEY
-    )
+#     obj = s3.get_object(
+#         Bucket=S3_BUCKET,
+#         Key=S3_METADATA_KEY
+#     )
 
-    return pd.read_csv(obj["Body"], dtype=dtype)
+#     return pd.read_csv(obj["Body"], dtype=dtype)
 
 @st.cache_data(ttl=300)
-def load_metadata_from_s3(bucket, key):
+def load_metadata(bucket, key):
     dtype = {"Subject_ID": str, "Session_ID": str}
     s3 = boto3.client("s3")
     obj = s3.get_object(Bucket=bucket, Key=key)

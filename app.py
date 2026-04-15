@@ -3,7 +3,7 @@ import pandas as pd
 import sqlite3
 # import os
 from filters import render_filters
-from file_helpers import load_metadata, load_metadata_from_s3, add_presigned_links
+from file_helpers import load_metadata, add_presigned_links
 from config import DISPLAY_COLUMNS, GALLERY_SORT_OPTIONS, DATA_SOURCES
 
 st.set_page_config(
@@ -122,7 +122,7 @@ metadata_dfs = []
 for src in selected_sources:
     meta = DATA_SOURCES[src]
     try:
-        df_src = load_metadata_from_s3(meta["bucket"], meta["metadata_key"])
+        df_src = load_metadata(meta["bucket"], meta["metadata_key"])
         metadata_dfs.append(df_src)
     except Exception as e:
         st.error(f"Failed to load metadata for {meta['label']}: {e}")
