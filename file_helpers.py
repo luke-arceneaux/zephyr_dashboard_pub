@@ -17,6 +17,15 @@ def load_metadata():
 
     return pd.read_csv(obj["Body"], dtype=dtype)
 
+@st.cache_data(ttl=300)
+def load_metadata_from_s3(bucket, key):
+    dtype = {"Subject_ID": str, "Session_ID": str}
+    s3 = boto3.client("s3")
+    obj = s3.get_object(Bucket=bucket, Key=key)
+    df = pd.read_csv(obj["Body"], dtype=dtype)
+    df["source"] = bucket  # Add a source column for later filtering/labeling
+    return df
+
 def parse_s3_uri(uri):
     parsed = urlparse(uri)
     bucket = parsed.netloc

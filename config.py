@@ -1,6 +1,18 @@
 PRESIGNED_EXPIRY = 3600  # seconds
-S3_BUCKET = "zephyrapptestbucket"
 S3_METADATA_KEY = "metadata/session_metadata.csv"
+DATA_SOURCES = {
+    "zephyr": {
+        "label": "ZEPHYR",
+        "bucket": "zephyrapptestbucket",
+        "metadata_key": "metadata/session_metadata.csv"
+    },
+    "mesa": {
+        "label": "MESA",
+        "bucket": "neurostimstore",
+        "metadata_key": "metadata/session_metadata.csv"
+    }
+    # Future: add scidb here
+}
 DISPLAY_COLUMNS = [
     "Subject_ID",
     "Session_ID",

@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
-import os
+# import os
 from filters import render_filters
-from file_helpers import load_metadata, add_presigned_links
-from config import DISPLAY_COLUMNS, GALLERY_SORT_OPTIONS
+from file_helpers import load_metadata, load_metadata_from_s3, add_presigned_links
+from config import DISPLAY_COLUMNS, GALLERY_SORT_OPTIONS, DATA_SOURCES
 
 st.set_page_config(
     page_title="Sleep Data Dashboard",
@@ -107,7 +107,33 @@ init_archive_db()
 # Load Data
 # -----------------------------
 
-df = load_metadata().copy()
+selected_sources = st.multiselect(
+    "Select data sources",
+    options=list(DATA_SOURCES.keys()),
+    format_func=lambda k: DATA_SOURCES[k]["label"],
+    default=["zephyr"]
+)
+
+if not selected_sources:
+    st.warning("Please select at least one data source.")
+    st.stop()
+
+metadata_dfs = []
+for src in selected_sources:
+    meta = DATA_SOURCES[src]
+    try:
+        df_src = load_metadata_from_s3(meta["bucket"], meta["metadata_key"])
+        metadata_dfs.append(df_src)
+    except Exception as e:
+        st.error(f"Failed to load metadata for {meta['label']}: {e}")
+
+if not metadata_dfs:
+    st.warning("No metadata loaded from selected sources.")
+    st.stop()
+
+df = pd.concat(metadata_dfs, ignore_index=True)
+
+# df = load_metadata().copy()
 
 # df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%Y")
 df["Date"] = pd.to_datetime(
@@ -120,6 +146,7 @@ df["SessionDateTime"] = pd.to_datetime(
     errors="coerce"
 )
 df["HypBurIndex(4%)"] = df["Hypoxic Burden (4%)"]/(df["Duration (min)"]/60)
+
 # -----------------------------
 # Header
 # -----------------------------
