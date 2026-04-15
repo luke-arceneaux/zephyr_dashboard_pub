@@ -133,6 +133,7 @@ if not metadata_dfs:
     st.stop()
 
 df = pd.concat(metadata_dfs, ignore_index=True)
+df.drop_duplicates(keep="last", inplace=True)  # Keep the most recent record if duplicates exist
 
 # df = load_metadata().copy()
 
