@@ -437,7 +437,7 @@ if st.session_state.get("show_spo2_gallery", False):
                         </div>
                         <div style="font-size:0.85rem; line-height:1.4;">
                             Duration: {row['Duration (min)']/60:.1f} hrs<br>
-                            ODI: {row['ODI']:.2f} | Hypoxic Burden: {row['Hypoxic Burden (4%)']:.2f} | T90%: {row['T90_perc']:.2f}%
+                            ODI: {row['ODI']:.2f} | Hypoxic Burden: {row['HypBurIndex(4%)']:.2f} | T90%: {row['T90_perc']:.2f}%
                         </div>
                         """,
                         unsafe_allow_html=True
