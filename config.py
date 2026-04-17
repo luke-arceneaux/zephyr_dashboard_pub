@@ -10,6 +10,11 @@ DATA_SOURCES = {
         "label": "MESA",
         "bucket": "neurostimstore",
         "metadata_key": "metadata/session_metadata.csv"
+    },
+    "scidb": {
+        "label": "SCIDB",
+        "bucket": "neurostimstore",
+        "metadata_key": "metadata/session_metadata.csv"
     }
     # Future: add scidb here
 }

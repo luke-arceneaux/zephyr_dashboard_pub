@@ -118,15 +118,21 @@ if not selected_sources:
     st.warning("Please select at least one data source.")
     st.stop()
 
-metadata_dfs = []
+# Build a set of unique (bucket, metadata_key) pairs
+unique_metadata_files = set()
 for src in selected_sources:
     meta = DATA_SOURCES[src]
+    unique_metadata_files.add((meta["bucket"], meta["metadata_key"]))
+
+# Load each unique metadata only once
+metadata_dfs = []
+for bucket, key in unique_metadata_files:
     try:
-        df_src = load_metadata(meta["bucket"], meta["metadata_key"])
-        print(f"Loaded {len(df_src)} records from {meta['label']}")
+        df_src = load_metadata(bucket, key)
+        print(f"Loaded {len(df_src)} records from {bucket}/{key}")
         metadata_dfs.append(df_src)
     except Exception as e:
-        st.error(f"Failed to load metadata for {meta['label']}: {e}")
+        st.error(f"Failed to load metadata for {bucket}/{key}: {e}")
 
 if not metadata_dfs:
     st.warning("No metadata loaded from selected sources.")
