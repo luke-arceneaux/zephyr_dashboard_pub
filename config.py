@@ -16,6 +16,7 @@ DATA_SOURCES = {
 DISPLAY_COLUMNS = [
     "Subject_ID",
     "Session_ID",
+    "Dataset",
     "Date",
     "Start Time",
     "Duration (min)",

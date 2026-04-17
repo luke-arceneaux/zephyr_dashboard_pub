@@ -173,8 +173,9 @@ filtered_df = df[
     (df["Duration (min)"] >= min_duration)
 ]
 
+df["Dataset_Subject"] = df["Dataset"].astype(str) + ":" + df["Subject_ID"].astype(str)
 if "All Subjects" not in selected_subject:
-    filtered_df = filtered_df[filtered_df["Subject_ID"].isin(selected_subject)]
+    filtered_df = filtered_df[filtered_df["Dataset_Subject"].isin(selected_subject)] #Subject_ID
 
 filtered_df = filtered_df.sort_values("SessionDateTime", ascending=False) # sort by subject ID?
 

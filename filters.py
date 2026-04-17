@@ -16,8 +16,9 @@ def render_filters(df):
         default_min_date = min_date_in_data
     default_max_date = max_date
 
+    df["Dataset_Subject"] = df["Dataset"].astype(str) + ":" + df["Subject_ID"].astype(str)
     ids_sorted = (
-        df.groupby('Subject_ID')['Date']
+        df.groupby('Dataset_Subject')['Date'] #Subject_ID
         .max()                 # most recent date per ID
         .sort_values(ascending=False)
         .index
