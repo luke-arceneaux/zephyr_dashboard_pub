@@ -375,6 +375,12 @@ if filter_hash != st.session_state.last_filter_hash:
 if st.session_state.get("show_spo2_gallery", False):
     sort_col = GALLERY_SORT_OPTIONS[sort_label]
 
+    # Filter out archived rows for the gallery if not showing archived data
+    if not show_archived:
+        filtered_df = filtered_df[~filtered_df.apply(
+            lambda row: archive_status.get((row["Subject_ID"], row["Session_ID"]), {}).get("archived", False), axis=1
+        )]
+
     gallery_df = filtered_df[
         filtered_df["SpO2 Snapshot"].notna() &
         (filtered_df["SpO2 Snapshot"] != "")
