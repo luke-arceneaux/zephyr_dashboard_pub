@@ -216,12 +216,12 @@ else:
 
 if not filtered_df.empty:
     col3.metric(
-        "Avg Hypoxic Burden",
-        f"{filtered_df['Hypoxic Burden (4%)'].mean():.2f}",
-        # f"±{filtered_df['Hypoxic Burden (4%)'].std():.2f}"
+        "Avg Hypoxic Burden Index",
+        f"{filtered_df['HypBurIndex(4%)'].mean():.2f}",
+        # f"±{filtered_df['HypBurIndex(4%)'].std():.2f}"
     )
 else:
-    col3.metric("Avg Hypoxic Burden", "N/A")
+    col3.metric("Avg Hypoxic Burden Index", "N/A")
 
 
 st.divider()
