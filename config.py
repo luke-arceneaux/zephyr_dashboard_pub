@@ -1,5 +1,9 @@
 PRESIGNED_EXPIRY = 3600  # seconds
 S3_METADATA_KEY = "metadata/session_metadata.csv"
+S3_DB_BUCKET = "zephyrapptestbucket"
+S3_DB_KEY = "metadata/session_notes.db"
+LOCAL_DB_PATH = "session_notes.db"
+
 DATA_SOURCES = {
     "zephyr": {
         "label": "ZEPHYR",

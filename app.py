@@ -3,7 +3,7 @@ import pandas as pd
 import sqlite3
 # import os
 from filters import render_filters
-from file_helpers import load_metadata, add_presigned_links
+from file_helpers import load_metadata, add_presigned_links, download_db_from_s3, upload_db_to_s3
 from config import DISPLAY_COLUMNS, GALLERY_SORT_OPTIONS, DATA_SOURCES
 
 st.set_page_config(
@@ -16,6 +16,8 @@ st.set_page_config(
 # -----------------------------
 
 NOTES_DB_PATH = "session_notes.db"
+
+download_db_from_s3()
 
 def init_notes_db():
     conn = sqlite3.connect(NOTES_DB_PATH)
@@ -51,6 +53,7 @@ def save_note(subject_id, session_id, note):
     )
     conn.commit()
     conn.close()
+    upload_db_to_s3()
 
 init_notes_db()
 
@@ -90,6 +93,7 @@ def set_archive(subject_id, session_id, reason, archived=True):
         )
     conn.commit()
     conn.close()
+    upload_db_to_s3()
 
 def get_archive_status():
     conn = sqlite3.connect(NOTES_DB_PATH)
@@ -100,7 +104,6 @@ def get_archive_status():
     # Return as dict for fast lookup
     return {(row[0], row[1]): {'archived': bool(row[2]), 'archive_reason': row[3]} for row in rows}
 
-init_notes_db()
 init_archive_db()
 
 # -----------------------------

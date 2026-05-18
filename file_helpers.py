@@ -2,20 +2,7 @@ import boto3
 from urllib.parse import urlparse 
 import pandas as pd
 import streamlit as st
-from config import PRESIGNED_EXPIRY #, S3_BUCKET, S3_METADATA_KEY
-
-# @st.cache_data(ttl=300)  # refresh every 5 minutes
-# def load_metadata():
-#     dtype = {"Subject_ID": str, "Session_ID": str}
-
-#     s3 = boto3.client("s3")
-
-#     obj = s3.get_object(
-#         Bucket=S3_BUCKET,
-#         Key=S3_METADATA_KEY
-#     )
-
-#     return pd.read_csv(obj["Body"], dtype=dtype)
+from config import PRESIGNED_EXPIRY, S3_DB_BUCKET, S3_DB_KEY, LOCAL_DB_PATH 
 
 @st.cache_data(ttl=300)
 def load_metadata(bucket, key):
@@ -66,3 +53,19 @@ def add_presigned_links(df):
     df["SpO2 Snapshot"] = df["SpO2 Snapshot"].apply(generate_presigned_url)
 
     return df
+
+def download_db_from_s3():
+    s3 = boto3.client("s3")
+    try:
+        s3.download_file(S3_DB_BUCKET, S3_DB_KEY, LOCAL_DB_PATH)
+        print("DB downloaded from S3.")
+    except Exception as e:
+        print("No DB found on S3 or error downloading:", e)
+
+def upload_db_to_s3():
+    s3 = boto3.client("s3")
+    try:
+        s3.upload_file(LOCAL_DB_PATH, S3_DB_BUCKET, S3_DB_KEY)
+        print("DB uploaded to S3.")
+    except Exception as e:
+        print("Error uploading DB to S3:", e)
