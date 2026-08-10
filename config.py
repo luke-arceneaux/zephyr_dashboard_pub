@@ -20,11 +20,11 @@ DATA_SOURCES = {
         "bucket": "neurostimstore",
         "metadata_key": "metadata/session_metadata.csv"
     },
-    "shhs": {
-        "label": "SHHS",
-        "bucket": "neurostimstore",
-        "metadata_key": "metadata/session_metadata.csv"
-    }
+    # "shhs": {
+    #     "label": "SHHS",
+    #     "bucket": "neurostimstore",
+    #     "metadata_key": "metadata/session_metadata.csv"
+    # }
 }
 DISPLAY_COLUMNS = [
     "Subject_ID",
