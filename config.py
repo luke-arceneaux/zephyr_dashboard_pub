@@ -19,8 +19,12 @@ DATA_SOURCES = {
         "label": "SCIDB",
         "bucket": "neurostimstore",
         "metadata_key": "metadata/session_metadata.csv"
+    },
+    "shhs": {
+        "label": "SHHS",
+        "bucket": "neurostimstore",
+        "metadata_key": "metadata/session_metadata.csv"
     }
-    # Future: add scidb here
 }
 DISPLAY_COLUMNS = [
     "Subject_ID",
