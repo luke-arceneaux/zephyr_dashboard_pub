@@ -149,8 +149,9 @@ df = df[df["Dataset"].isin(selected_sources)]
 # df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%Y")
 df["Date"] = pd.to_datetime(
     df["Date"],
-    format="mixed"
-).dt.date
+    format="mixed",
+    errors="coerce"
+).dt.normalize()
 df["Start Time"] = pd.to_datetime(df["Start Time"], format="%H:%M:%S").dt.time
 df["SessionDateTime"] = pd.to_datetime(
     df["Date"].astype(str) + " " + df["Start Time"].astype(str),

@@ -7,7 +7,7 @@ def render_filters(df):
     """
     min_date_in_data = df["Date"].min()
     max_date = df["Date"].max()
-    cutoff_date = pd.to_datetime("2026-01-01").date()
+    cutoff_date = pd.Timestamp("2026-01-01")
 
     # If any date in the data is after 1/1/2026, use 1/1/2026 as min, else use min_date_in_data
     if (df["Date"] > cutoff_date).any():
@@ -30,9 +30,9 @@ def render_filters(df):
     with col1:
         date_range = st.date_input(
             "Session Date Range",
-            value=(default_min_date, default_max_date),
-            min_value=min_date_in_data,
-            max_value=max_date
+            value=(default_min_date.date(), default_max_date.date()),
+            min_value=min_date_in_data.date(),
+            max_value=max_date.date()
         )
         # Handle single-date edge case
         # if isinstance(date_range, tuple) and len(date_range) == 2:
@@ -65,4 +65,4 @@ def render_filters(df):
             default=["All Subjects"]
         )
 
-    return start_date, end_date, min_duration, selected_subject
+    return pd.Timestamp(start_date), pd.Timestamp(end_date), min_duration, selected_subject
